@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/englishtown/vertx-mod-hk2.png)](https://travis-ci.org/englishtown/vertx-mod-hk2)
+
 # Vert.x HK2 Module
 
 Provides a VerticleFactory that uses HK2 for dependency injection.
