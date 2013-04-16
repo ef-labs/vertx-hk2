@@ -5,15 +5,12 @@ import org.glassfish.hk2.extension.ServiceLocatorGenerator;
 import org.glassfish.hk2.internal.ServiceLocatorFactoryImpl;
 
 /**
- * Created with IntelliJ IDEA.
- * User: adriangonzalez
- * Date: 4/5/13
- * Time: 2:33 PM
- * To change this template use File | Settings | File Templates.
+ * Extends the HK2 {@link ServiceLocatorFactoryImpl} providing a default name if the {@link ServiceLocator} name is
+ * null when trying to create.
  */
-public class HK2ServiceLocatorFactoryImpl extends ServiceLocatorFactoryImpl {
+class HK2ServiceLocatorFactoryImpl extends ServiceLocatorFactoryImpl {
 
-    public String defaultName;
+    private final String defaultName;
 
     public HK2ServiceLocatorFactoryImpl(String defaultName) {
         this.defaultName = defaultName;
