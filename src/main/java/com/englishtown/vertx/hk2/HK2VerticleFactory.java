@@ -58,6 +58,13 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
         } else {
             clazz = cl.loadClass(className);
         }
+        Verticle verticle = createVerticle(clazz);
+        verticle.setVertx(vertx);
+        verticle.setContainer(container);
+        return verticle;
+    }
+
+    private Verticle createVerticle(Class<?> clazz) throws Exception {
 
         JsonObject config = this.container.config();
         if (config == null) {
@@ -91,7 +98,6 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
         }
 
         return (Verticle) locator.createAndInitialize(clazz);
-
     }
 
     private void setServiceLocatorFactory(JsonObject config) {
