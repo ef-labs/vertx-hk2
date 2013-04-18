@@ -59,7 +59,7 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
             clazz = cl.loadClass(className);
         }
 
-        JsonObject config = this.container.getConfig();
+        JsonObject config = this.container.config();
         if (config == null) {
             config = new JsonObject();
         }

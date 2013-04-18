@@ -34,8 +34,8 @@ public class HK2VerticleFactoryTest {
         Vertx vertx = mock(Vertx.class);
 
         Container container = mock(Container.class);
-        when(container.getConfig()).thenReturn(config);
-        when(container.getLogger()).thenReturn(logger);
+        when(container.config()).thenReturn(config);
+        when(container.logger()).thenReturn(logger);
 
         factory.init(vertx, container, this.getClass().getClassLoader());
         factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle");
