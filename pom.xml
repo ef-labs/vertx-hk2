@@ -114,6 +114,12 @@
             <version>${vertx.testtools.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-maven-plugin</artifactId>
+            <version>${maven.vertx.plugin.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -208,7 +214,7 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.vertx.build.maven</groupId>
+                <groupId>io.vertx</groupId>
                 <artifactId>vertx-maven-plugin</artifactId>
                 <version>${maven.vertx.plugin.version}</version>
                 <executions>
