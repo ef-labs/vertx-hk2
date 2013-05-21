@@ -17,11 +17,7 @@ import org.vertx.java.platform.impl.java.JavaVerticleFactory;
 import java.lang.reflect.Field;
 
 /**
- * Created with IntelliJ IDEA.
- * User: adriangonzalez
- * Date: 4/5/13
- * Time: 12:25 PM
- * To change this template use File | Settings | File Templates.
+ * Extends the default vert.x {@link JavaVerticleFactory} using HK2 for dependency injection.
  */
 public class HK2VerticleFactory extends JavaVerticleFactory {
 
@@ -55,15 +51,22 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
 
         if (isJavaSource(main)) {
             // TODO - is this right???
-            // Don't we want one CompilingClassloader per instance of this?
+            // Don't we want one CompilingClassLoader per instance of this?
             CompilingClassLoader compilingLoader = new CompilingClassLoader(cl, main);
             className = compilingLoader.resolveMainClassName();
             clazz = compilingLoader.loadClass(className);
         } else {
             clazz = cl.loadClass(className);
         }
+        Verticle verticle = createVerticle(clazz);
+        verticle.setVertx(vertx);
+        verticle.setContainer(container);
+        return verticle;
+    }
 
-        JsonObject config = this.container.getConfig();
+    private Verticle createVerticle(Class<?> clazz) throws Exception {
+
+        JsonObject config = this.container.config();
         if (config == null) {
             config = new JsonObject();
         }
@@ -81,8 +84,8 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
                         + " does not implement Binder.");
             }
         } catch (ClassNotFoundException e) {
-            logger.error("HK2 bootstrap binder class " + bootstrapName
-                    + " was not found.", e);
+            logger.warn("HK2 bootstrap binder class " + bootstrapName
+                    + " was not found.  Are you missing injection bindings?");
         }
 
         setServiceLocatorFactory(config);
@@ -95,7 +98,6 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
         }
 
         return (Verticle) locator.createAndInitialize(clazz);
-
     }
 
     private void setServiceLocatorFactory(JsonObject config) {

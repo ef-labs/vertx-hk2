@@ -7,13 +7,9 @@ import org.vertx.java.platform.Container;
 import javax.inject.Singleton;
 
 /**
- * Created with IntelliJ IDEA.
- * User: adriangonzalez
- * Date: 4/5/13
- * Time: 3:02 PM
- * To change this template use File | Settings | File Templates.
+ * HK2 {@link AbstractBinder} for vertx and container injections
  */
-public class VertxBinder extends AbstractBinder {
+class VertxBinder extends AbstractBinder {
 
     private final Vertx vertx;
     private final Container container;
@@ -24,8 +20,7 @@ public class VertxBinder extends AbstractBinder {
     }
 
     /**
-     * Implement to provide binding definitions using the exposed binding
-     * methods.
+     * {@inheritDoc}
      */
     @Override
     protected void configure() {
