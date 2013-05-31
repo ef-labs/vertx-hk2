@@ -11,7 +11,7 @@
     <groupId>com.englishtown</groupId>
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-beta2-SNAPSHOT</version>
+    <version>1.0.0-beta2</version>
 
     <name>vertx-mod-hk2</name>
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
@@ -302,7 +302,7 @@
     <scm>
         <connection>scm:git:ssh://git@github.com/englishtown/vertx-mod-hk2.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/englishtown/vertx-mod-hk2.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>1.0.0-beta2</tag>
         <url>https://github.com/englishtown/vertx-mod-hk2</url>
     </scm>
 
