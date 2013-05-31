@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -12,7 +11,7 @@
     <groupId>com.englishtown</groupId>
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-beta1</version>
+    <version>1.0.0-beta2</version>
 
     <name>vertx-mod-hk2</name>
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
@@ -44,9 +43,9 @@
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
 
         <!--Dependency versions-->
-        <hk2.version>2.1.66</hk2.version>
+        <hk2.version>2.1.96</hk2.version>
         <inject.version>1</inject.version>
-        <vertx.version>2.0.0-beta2</vertx.version>
+        <vertx.version>2.0.0-beta3</vertx.version>
         <vertx.testtools.version>2.0.0-beta1</vertx.testtools.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.9.5</mockito.version>
@@ -55,12 +54,14 @@
         <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
         <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
         <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
-        <maven.vertx.plugin.version>2.0.0-SNAPSHOT</maven.vertx.plugin.version>
+        <maven.vertx.plugin.version>1.0.0-beta1</maven.vertx.plugin.version>
         <maven.surefire.plugin.version>2.14</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>2.14</maven.failsafe.plugin.version>
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
         <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
         <maven.dependency.plugin.version>2.7</maven.dependency.plugin.version>
+        <maven.jgitflow.plugin.version>1.0-alpha8</maven.jgitflow.plugin.version>
+        <maven.gpg.plugin.version>1.4</maven.gpg.plugin.version>
     </properties>
 
     <dependencies>
@@ -237,6 +238,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.atlassian.maven.plugins</groupId>
+                <artifactId>maven-jgitflow-plugin</artifactId>
+                <version>${maven.jgitflow.plugin.version}</version>
+                <configuration>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven.gpg.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -278,9 +300,9 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:git@github.com:englishtown/vertx-mod-hk2.git</connection>
-        <developerConnection>scm:git:git@github.com:englishtown/vertx-mod-hk2.git</developerConnection>
-        <tag>HEAD</tag>
+        <connection>scm:git:ssh://git@github.com/englishtown/vertx-mod-hk2.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/englishtown/vertx-mod-hk2.git</developerConnection>
+        <tag>1.0.0-beta2</tag>
         <url>https://github.com/englishtown/vertx-mod-hk2</url>
     </scm>
 
