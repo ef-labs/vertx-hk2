@@ -3,36 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
+        <groupId>com.englishtown</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>1.1.0</version>
     </parent>
 
-    <groupId>com.englishtown</groupId>
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0-beta3-SNAPSHOT</version>
 
-    <name>vertx-mod-hk2</name>
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
-    <url>https://github.com/englishtown/vertx-mod-hk2</url>
     <inceptionYear>2013</inceptionYear>
 
-    <organization>
-        <name>Englishtown</name>
-        <url>http://www.englishtown.com</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>http://englishtown.mit-license.org/</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Set pullindeps to true if you want any modules specified in the 'includes' and 'deploys' fields
         in your mod.json to be automatically pulled in during packaging and added inside your module. Doing this means your
@@ -47,21 +30,9 @@
         <inject.version>1</inject.version>
         <vertx.version>2.0.0-beta3</vertx.version>
         <vertx.testtools.version>2.0.0-beta1</vertx.testtools.version>
-        <junit.version>4.11</junit.version>
-        <mockito.version>1.9.5</mockito.version>
 
         <!--Plugin versions-->
-        <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
-        <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
         <maven.vertx.plugin.version>1.0.0-beta1</maven.vertx.plugin.version>
-        <maven.surefire.plugin.version>2.14</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>2.14</maven.failsafe.plugin.version>
-        <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
-        <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
-        <maven.dependency.plugin.version>2.7</maven.dependency.plugin.version>
-        <maven.jgitflow.plugin.version>1.0-alpha8</maven.jgitflow.plugin.version>
-        <maven.gpg.plugin.version>1.4</maven.gpg.plugin.version>
     </properties>
 
     <dependencies>
@@ -94,13 +65,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -141,15 +110,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven.resources.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-mod-to-target</id>
@@ -172,7 +136,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven.dependency.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-mod-dependencies-to-target</id>
@@ -190,17 +153,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.plugin.version}</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test*.java</include>
-                    </includes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${maven.failsafe.plugin.version}</version>
                 <configuration>
                     <systemProperties>
                         <property>
@@ -212,16 +168,9 @@
                         <include>**/integration/**</include>
                     </includes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
@@ -241,56 +190,26 @@
             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-jgitflow-plugin</artifactId>
-                <version>${maven.jgitflow.plugin.version}</version>
-                <configuration>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>${maven.gpg.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <reporting>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>${maven.surefire.report.plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.plugin.version}</version>
-                <configuration>
-                    <aggregate>true</aggregate>
-                </configuration>
             </plugin>
         </plugins>
     </reporting>
-
-    <issueManagement>
-        <system>Github Issues</system>
-        <url>https://github.com/englishtown/vertx-mod-hk2/issues</url>
-    </issueManagement>
 
     <distributionManagement>
         <site>
