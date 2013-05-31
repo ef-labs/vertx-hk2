@@ -61,6 +61,7 @@
         <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
         <maven.dependency.plugin.version>2.7</maven.dependency.plugin.version>
         <maven.jgitflow.plugin.version>1.0-alpha8</maven.jgitflow.plugin.version>
+        <maven.gpg.plugin.version>1.4</maven.gpg.plugin.version>
     </properties>
 
     <dependencies>
@@ -243,6 +244,20 @@
                 <version>${maven.jgitflow.plugin.version}</version>
                 <configuration>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven.gpg.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
