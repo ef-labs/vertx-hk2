@@ -11,7 +11,7 @@
     <groupId>com.englishtown</groupId>
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-beta3-SNAPSHOT</version>
+    <version>1.0.0-beta2-SNAPSHOT</version>
 
     <name>vertx-mod-hk2</name>
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
