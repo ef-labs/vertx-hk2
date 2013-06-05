@@ -5,18 +5,17 @@
     <parent>
         <groupId>com.englishtown</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.4.0</version>
     </parent>
 
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
 
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
     <inceptionYear>2013</inceptionYear>
 
     <properties>
-
         <!-- Set pullindeps to true if you want any modules specified in the 'includes' and 'deploys' fields
         in your mod.json to be automatically pulled in during packaging and added inside your module. Doing this means your
         module won't download and install those dependencies at run-time when they're first requested. -->
@@ -219,10 +218,10 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com/englishtown/vertx-mod-hk2.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/englishtown/vertx-mod-hk2.git</developerConnection>
-        <tag>1.0.0-beta3</tag>
-        <url>https://github.com/englishtown/vertx-mod-hk2</url>
+        <connection>scm:git:ssh://git@github.com/englishtown/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/englishtown/${project.artifactId}.git</developerConnection>
+        <tag>1.0.0-beta4</tag>
+        <url>https://github.com/englishtown/${project.artifactId}</url>
     </scm>
 
 </project>
