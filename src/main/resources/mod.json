@@ -1,2 +1,7 @@
 {
+    "description":"Provides a VerticleFactory that uses HK2 for dependency injection",
+    "licenses": ["http://englishtown.mit-license.org/"],
+    "author": "Englishtown",
+    "keywords": ["dependency injection", "CDI", "VerticleFactory", "HK2"],
+    "homepage": "https://github.com/englishtown/vertx-mod-hk2"
 }
