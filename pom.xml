@@ -10,7 +10,7 @@
 
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-beta4</version>
+    <version>1.0.0-beta5-SNAPSHOT</version>
 
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
     <inceptionYear>2013</inceptionYear>
@@ -220,7 +220,7 @@
     <scm>
         <connection>scm:git:ssh://git@github.com/englishtown/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/englishtown/${project.artifactId}.git</developerConnection>
-        <tag>1.0.0-beta4</tag>
+        <tag>HEAD</tag>
         <url>https://github.com/englishtown/${project.artifactId}</url>
     </scm>
 
