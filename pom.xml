@@ -27,8 +27,8 @@
         <!--Dependency versions-->
         <hk2.version>2.1.96</hk2.version>
         <inject.version>1</inject.version>
-        <vertx.version>2.0.0-beta3</vertx.version>
-        <vertx.testtools.version>2.0.0-beta1</vertx.testtools.version>
+        <vertx.version>2.0.0-beta5</vertx.version>
+        <vertx.testtools.version>2.0.0-beta2</vertx.testtools.version>
 
         <!--Plugin versions-->
         <maven.vertx.plugin.version>1.0.0-beta1</maven.vertx.plugin.version>
