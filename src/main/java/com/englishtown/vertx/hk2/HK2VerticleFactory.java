@@ -38,6 +38,7 @@ import org.vertx.java.platform.impl.java.CompilingClassLoader;
 import org.vertx.java.platform.impl.java.JavaVerticleFactory;
 
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 /**
  * Extends the default vert.x {@link JavaVerticleFactory} using HK2 for dependency injection.
@@ -50,8 +51,6 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(HK2VerticleFactory.class);
 
-    private static final String CONFIG_SERVICE_LOCATOR_NAME = "vertx_service_locator_name";
-    private static final String SERVICE_LOCATOR_NAME = "vertx.service.locator";
     private static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
     private static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
 
@@ -111,7 +110,7 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
                     + " was not found.  Are you missing injection bindings?");
         }
 
-        setServiceLocatorFactory(config);
+        setServiceLocatorFactory();
         ServiceLocatorFactory factory = ServiceLocatorFactory.getInstance();
         ServiceLocator locator = factory.create(null);
 
@@ -123,8 +122,8 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
         return (Verticle) locator.createAndInitialize(clazz);
     }
 
-    private void setServiceLocatorFactory(JsonObject config) {
-        String containerName = config.getString(CONFIG_SERVICE_LOCATOR_NAME, SERVICE_LOCATOR_NAME);
+    private void setServiceLocatorFactory() {
+        String containerName = UUID.randomUUID().toString();
         ServiceLocatorFactory factory = new HK2ServiceLocatorFactoryImpl(containerName);
 
         Class factoryClass = ServiceLocatorFactory.class;
