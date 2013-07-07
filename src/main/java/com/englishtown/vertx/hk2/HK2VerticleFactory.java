@@ -37,8 +37,6 @@ import org.vertx.java.platform.Verticle;
 import org.vertx.java.platform.impl.java.CompilingClassLoader;
 import org.vertx.java.platform.impl.java.JavaVerticleFactory;
 
-import java.lang.reflect.Field;
-
 /**
  * Extends the default vert.x {@link JavaVerticleFactory} using HK2 for dependency injection.
  */
@@ -50,11 +48,12 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(HK2VerticleFactory.class);
 
-    private static final String CONFIG_SERVICE_LOCATOR_NAME = "vertx_service_locator_name";
-    private static final String SERVICE_LOCATOR_NAME = "vertx.service.locator";
     private static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
     private static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init(Vertx vertx, Container container, ClassLoader cl) {
         super.init(vertx, container, cl);
@@ -111,7 +110,7 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
                     + " was not found.  Are you missing injection bindings?");
         }
 
-        setServiceLocatorFactory(config);
+        // Each verticle factory will have it's own service locator instance
         ServiceLocatorFactory factory = ServiceLocatorFactory.getInstance();
         ServiceLocator locator = factory.create(null);
 
@@ -121,28 +120,6 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
         }
 
         return (Verticle) locator.createAndInitialize(clazz);
-    }
-
-    private void setServiceLocatorFactory(JsonObject config) {
-        String containerName = config.getString(CONFIG_SERVICE_LOCATOR_NAME, SERVICE_LOCATOR_NAME);
-        ServiceLocatorFactory factory = new HK2ServiceLocatorFactoryImpl(containerName);
-
-        Class factoryClass = ServiceLocatorFactory.class;
-
-        try {
-            Field instance = factoryClass.getDeclaredField("INSTANCE");
-            instance.setAccessible(true);
-
-            instance.set(null, factory);
-
-        } catch (NoSuchFieldException e) {
-            logger.error("NoSuchFieldException while setting the service locator factory", e);
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            logger.error("IllegalAccessException while setting the service locator factory", e);
-            throw new RuntimeException(e);
-        }
-
     }
 
     private boolean isJavaSource(String main) {
