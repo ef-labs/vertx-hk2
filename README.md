@@ -24,10 +24,10 @@ NOTE: Vert.x configuration is not currently available in a VerticleFactory, so d
 
 
 To configure Vert.x to use the HK2VerticleFactory modify the langs.properties java entry like this:
-`java=com.englishtown~vertx-mod-hk2~1.0.0-CR2-SNAPSHOT:com.englishtown.vertx.hk2.HK2VerticleFactory`
+`java=com.englishtown~vertx-mod-hk2~1.0.0-CR2:com.englishtown.vertx.hk2.HK2VerticleFactory`
 
 or set a system property when running:
-`-Dvertx.langs.java=com.englishtown~vertx-mod-hk2~1.0.0-CR2-SNAPSHOT:com.englishtown.vertx.hk2.HK2VerticleFactory`
+`-Dvertx.langs.java=com.englishtown~vertx-mod-hk2~1.0.0-CR2:com.englishtown.vertx.hk2.HK2VerticleFactory`
 
 
 ## Example
