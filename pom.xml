@@ -27,7 +27,7 @@
         <!--Dependency versions-->
         <hk2.version>2.1.96</hk2.version>
         <inject.version>1</inject.version>
-        <vertx.version>2.0.0-CR2</vertx.version>
+        <vertx.version>2.0.0-CR3</vertx.version>
         <vertx.testtools.version>2.0.0-CR2</vertx.testtools.version>
 
         <!--Plugin versions-->
