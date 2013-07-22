@@ -10,7 +10,7 @@
 
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-CR4-SNAPSHOT</version>
+    <version>1.0.0-final</version>
 
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
     <inceptionYear>2013</inceptionYear>
@@ -26,12 +26,11 @@
 
         <!--Dependency versions-->
         <hk2.version>2.1.96</hk2.version>
-        <inject.version>1</inject.version>
-        <vertx.version>2.0.0-CR3</vertx.version>
-        <vertx.testtools.version>2.0.0-CR2</vertx.testtools.version>
+        <vertx.version>2.0.0-final</vertx.version>
+        <vertx.testtools.version>2.0.0-final</vertx.testtools.version>
 
         <!--Plugin versions-->
-        <maven.vertx.plugin.version>1.0.0-CR2</maven.vertx.plugin.version>
+        <maven.vertx.plugin.version>2.0.0-final</maven.vertx.plugin.version>
     </properties>
 
     <dependencies>
@@ -152,6 +151,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*Test*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/integration/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -220,7 +227,7 @@
     <scm>
         <connection>scm:git:ssh://git@github.com/englishtown/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/englishtown/${project.artifactId}.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>1.0.0-final</tag>
         <url>https://github.com/englishtown/${project.artifactId}</url>
     </scm>
 
