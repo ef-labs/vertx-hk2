@@ -27,8 +27,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.platform.Container;
 
-import javax.inject.Singleton;
-
 /**
  * HK2 {@link AbstractBinder} for vertx and container injections
  */

@@ -23,41 +23,26 @@
 
 package com.englishtown.vertx.hk2;
 
-import org.glassfish.hk2.api.DynamicConfiguration;
-import org.glassfish.hk2.api.DynamicConfigurationService;
-import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.api.ServiceLocatorFactory;
-import org.glassfish.hk2.utilities.Binder;
 import org.vertx.java.core.Vertx;
-import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
 import org.vertx.java.platform.Container;
 import org.vertx.java.platform.Verticle;
-import org.vertx.java.platform.impl.java.CompilingClassLoader;
-import org.vertx.java.platform.impl.java.JavaVerticleFactory;
+import org.vertx.java.platform.VerticleFactory;
 
 /**
- * Extends the default vert.x {@link JavaVerticleFactory} using HK2 for dependency injection.
+ * Implements {@link VerticleFactory} using an HK2 verticle wrapper for dependency injection.
  */
-public class HK2VerticleFactory extends JavaVerticleFactory {
+public class HK2VerticleFactory implements VerticleFactory {
 
     private Vertx vertx;
     private Container container;
     private ClassLoader cl;
-
-    private static final Logger logger = LoggerFactory.getLogger(HK2VerticleFactory.class);
-
-    private static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
-    private static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void init(Vertx vertx, Container container, ClassLoader cl) {
-        super.init(vertx, container, cl);
-
         this.vertx = vertx;
         this.container = container;
         this.cl = cl;
@@ -68,71 +53,21 @@ public class HK2VerticleFactory extends JavaVerticleFactory {
      */
     @Override
     public Verticle createVerticle(String main) throws Exception {
-        String className = main;
-        Class<?> clazz;
-
-        if (isJavaSource(main)) {
-            // TODO - is this right???
-            // Don't we want one CompilingClassLoader per instance of this?
-            CompilingClassLoader compilingLoader = new CompilingClassLoader(cl, main);
-            className = compilingLoader.resolveMainClassName();
-            clazz = compilingLoader.loadClass(className);
-        } else {
-            clazz = cl.loadClass(className);
-        }
-        Verticle verticle = createVerticle(clazz);
+        Verticle verticle = new HK2VerticleLoader(main, cl);
         verticle.setVertx(vertx);
         verticle.setContainer(container);
         return verticle;
     }
 
-    private Verticle createVerticle(Class<?> clazz) throws Exception {
-
-        JsonObject config = this.container.config();
-        if (config == null) {
-            config = new JsonObject();
+    @Override
+    public void reportException(Logger logger, Throwable t) {
+        if (logger != null) {
+            logger.error("Exception in HK2VerticleFactory", t);
         }
-        String bootstrapName = config.getString(CONFIG_BOOTSTRAP_BINDER_NAME, BOOTSTRAP_BINDER_NAME);
-        Binder bootstrap = null;
-
-        try {
-            Class bootstrapClass = cl.loadClass(bootstrapName);
-            Object obj = bootstrapClass.newInstance();
-
-            if (obj instanceof Binder) {
-                bootstrap = (Binder) obj;
-            } else {
-                logger.error("Class " + bootstrapName
-                        + " does not implement Binder.");
-            }
-        } catch (ClassNotFoundException e) {
-            logger.warn("HK2 bootstrap binder class " + bootstrapName
-                    + " was not found.  Are you missing injection bindings?");
-        }
-
-        // Each verticle factory will have it's own service locator instance
-        ServiceLocatorFactory factory = ServiceLocatorFactory.getInstance();
-        ServiceLocator locator = factory.create(null);
-
-        bind(locator, new VertxBinder(this.vertx, this.container));
-        if (bootstrap != null) {
-            bind(locator, bootstrap);
-        }
-
-        return (Verticle) locator.createAndInitialize(clazz);
     }
 
-    private boolean isJavaSource(String main) {
-        return main.endsWith(".java");
+    @Override
+    public void close() {
     }
 
-    private static void bind(ServiceLocator locator, Binder binder) {
-        DynamicConfigurationService dcs = locator.getService(DynamicConfigurationService.class);
-        DynamicConfiguration dc = dcs.createDynamicConfiguration();
-
-        locator.inject(binder);
-        binder.bind(dc);
-
-        dc.commit();
-    }
 }

@@ -21,21 +21,20 @@
  * THE SOFTWARE.
  */
 
-package com.englishtown.vertx.hk2;
+import com.englishtown.vertx.hk2.MyDependency;
+import org.vertx.java.platform.Verticle;
 
-import com.englishtown.vertx.hk2.integration.CustomBinder;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import javax.inject.Inject;
 
-/**
- * Default bootstrap binder
- */
-public class BootstrapBinder extends AbstractBinder {
-    /**
-     * Implement to provide binding definitions using the exposed binding
-     * methods.
-     */
-    @Override
-    protected void configure() {
-        install(new CustomBinder());
+import static org.vertx.testtools.VertxAssert.assertNotNull;
+
+public class UncompiledDIVerticle extends Verticle {
+
+    private final MyDependency myDependency;
+
+    @Inject
+    public UncompiledDIVerticle(MyDependency myDependency) {
+        this.myDependency = myDependency;
+        assertNotNull(myDependency);
     }
 }

@@ -21,21 +21,18 @@
  * THE SOFTWARE.
  */
 
-package com.englishtown.vertx.hk2;
+package com.englishtown.vertx.hk2.integration;
 
-import com.englishtown.vertx.hk2.integration.CustomBinder;
+import com.englishtown.vertx.hk2.DefaultMyDependency;
+import com.englishtown.vertx.hk2.MyDependency;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 /**
- * Default bootstrap binder
+ * Custom HK2 binder
  */
-public class BootstrapBinder extends AbstractBinder {
-    /**
-     * Implement to provide binding definitions using the exposed binding
-     * methods.
-     */
+public class CustomBinder extends AbstractBinder {
     @Override
     protected void configure() {
-        install(new CustomBinder());
+        bind(DefaultMyDependency.class).to(MyDependency.class);
     }
 }
