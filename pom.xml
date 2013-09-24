@@ -17,7 +17,7 @@
 
     <properties>
         <!--Dependency versions-->
-        <hk2.version>2.2.0-b15</hk2.version>
+        <hk2.version>2.2.0-b17</hk2.version>
         <mockito.version>1.9.5</mockito.version>
     </properties>
 

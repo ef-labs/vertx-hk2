@@ -25,14 +25,9 @@ package com.englishtown.vertx.hk2;
 
 import org.junit.Test;
 import org.vertx.java.core.Vertx;
-import org.vertx.java.core.impl.DefaultVertx;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Container;
-import org.vertx.java.platform.PlatformManagerFactory;
-import org.vertx.java.platform.impl.DefaultContainer;
-import org.vertx.java.platform.impl.DefaultPlatformManagerFactory;
-import org.vertx.testtools.TestVerticle;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,6 +57,17 @@ public class HK2VerticleFactoryTest {
 
         factory.init(vertx, container, this.getClass().getClassLoader());
         factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle");
+
+    }
+
+    @Test
+    public void testReportException() throws Exception {
+
+        HK2VerticleFactory factory = new HK2VerticleFactory();
+        Logger logger = mock(Logger.class);
+
+        factory.reportException(null, null);
+        factory.reportException(logger, new RuntimeException());
 
     }
 

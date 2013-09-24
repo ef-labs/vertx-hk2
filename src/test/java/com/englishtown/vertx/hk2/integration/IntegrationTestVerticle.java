@@ -16,7 +16,7 @@ import static org.vertx.testtools.VertxAssert.testComplete;
 public class IntegrationTestVerticle extends TestVerticle {
 
     @Test
-    public void testDependencyInjection() throws Exception {
+    public void testDependencyInjection_Compiled() throws Exception {
 
         container.deployVerticle(DependencyInjectionVerticle.class.getName(), new Handler<AsyncResult<String>>() {
             @Override
@@ -27,4 +27,18 @@ public class IntegrationTestVerticle extends TestVerticle {
         });
 
     }
+
+    @Test
+    public void testDependencyInjection_Uncompiled() throws Exception {
+
+        container.deployVerticle("UncompiledDIVerticle.java", new Handler<AsyncResult<String>>() {
+            @Override
+            public void handle(AsyncResult<String> result) {
+                assertTrue(result.succeeded());
+                testComplete();
+            }
+        });
+
+    }
+
 }
