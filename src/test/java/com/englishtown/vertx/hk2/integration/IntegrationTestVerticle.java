@@ -12,7 +12,6 @@ import static org.vertx.testtools.VertxAssert.testComplete;
 /**
  * Integration test to show a module deployed with a injection constructor
  */
-@RunWith(CPJavaClassRunner.class)
 public class IntegrationTestVerticle extends TestVerticle {
 
     @Test
