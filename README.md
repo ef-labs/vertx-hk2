@@ -18,9 +18,7 @@ The vertx-mod-hk2 module configuration is as follows:
 }
 ````
 
-* `hk2_binder` -  The name of the HK2 binder class which contains the injection configuration.  Default is `"com.englishtown.vertx.hk2.BootstrapBinder"`.
-
-NOTE: Vert.x configuration is not currently available in a VerticleFactory, so default values will be used.
+* `hk2_binder` -  The name of the HK2 binder class which contains the injection configuration.  Default is `"com.englishtown.vertx.hk2.BootstrapBinder"`.  You can also provide an array of binder classes.
 
 
 To configure Vert.x to use the HK2VerticleFactory modify the langs.properties java entry like this:
