@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.impl.DefaultFutureResult;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Container;
@@ -106,6 +107,25 @@ public class HK2VerticleLoaderTest {
     public void testStart_Custom_Binder() throws Exception {
 
         config.putString("hk2_binder", CustomBinder.class.getName());
+
+        String main = DependencyInjectionVerticle.class.getName();
+        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
+
+        HK2VerticleLoader loader = createLoader(main);
+        loader.start(vr);
+
+        assertTrue(vr.succeeded());
+        verifyZeroInteractions(logger);
+        loader.stop();
+
+    }
+
+    @Test
+    public void testStart_Custom_Binder_Array() throws Exception {
+
+        config.putArray("hk2_binder", new JsonArray()
+                .addString(CustomBinder.class.getName())
+                .addString(BootstrapBinder.class.getName()));
 
         String main = DependencyInjectionVerticle.class.getName();
         DefaultFutureResult<Void> vr = new DefaultFutureResult<>();

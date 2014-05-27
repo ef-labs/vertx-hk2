@@ -29,9 +29,13 @@ import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.Binder;
 import org.vertx.java.core.Future;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 import org.vertx.java.platform.impl.java.CompilingClassLoader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * HK2 Verticle to lazy load the real verticle with DI
@@ -115,22 +119,32 @@ public class HK2VerticleLoader extends Verticle {
     private Verticle createRealVerticle(Class<?> clazz) throws Exception {
 
         JsonObject config = container.config();
-        String bootstrapName = config.getString(CONFIG_BOOTSTRAP_BINDER_NAME, BOOTSTRAP_BINDER_NAME);
-        Binder bootstrap = null;
+        Object field = config.getField(CONFIG_BOOTSTRAP_BINDER_NAME);
+        JsonArray bootstrapNames;
+        List<Binder> bootstraps = new ArrayList<>();
 
-        try {
-            Class bootstrapClass = cl.loadClass(bootstrapName);
-            Object obj = bootstrapClass.newInstance();
+        if (field instanceof JsonArray) {
+            bootstrapNames = (JsonArray) field;
+        } else {
+            bootstrapNames = new JsonArray().add((field == null ? BOOTSTRAP_BINDER_NAME : field));
+        }
 
-            if (obj instanceof Binder) {
-                bootstrap = (Binder) obj;
-            } else {
-                container.logger().error("Class " + bootstrapName
-                        + " does not implement Binder.");
+        for (int i = 0; i < bootstrapNames.size(); i++) {
+            String bootstrapName = bootstrapNames.get(i);
+            try {
+                Class bootstrapClass = cl.loadClass(bootstrapName);
+                Object obj = bootstrapClass.newInstance();
+
+                if (obj instanceof Binder) {
+                    bootstraps.add((Binder) obj);
+                } else {
+                    container.logger().error("Class " + bootstrapName
+                            + " does not implement Binder.");
+                }
+            } catch (ClassNotFoundException e) {
+                container.logger().error("HK2 bootstrap binder class " + bootstrapName
+                        + " was not found.  Are you missing injection bindings?");
             }
-        } catch (ClassNotFoundException e) {
-            container.logger().error("HK2 bootstrap binder class " + bootstrapName
-                    + " was not found.  Are you missing injection bindings?");
         }
 
         // Each verticle factory will have it's own service locator instance
@@ -138,7 +152,7 @@ public class HK2VerticleLoader extends Verticle {
         locator = factory.create(null);
 
         bind(locator, new VertxBinder(vertx, container));
-        if (bootstrap != null) {
+        for (Binder bootstrap : bootstraps) {
             bind(locator, bootstrap);
         }
 
