@@ -27,7 +27,9 @@ import org.glassfish.hk2.api.DynamicConfiguration;
 import org.glassfish.hk2.api.DynamicConfigurationService;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
+import org.glassfish.hk2.extension.ServiceLocatorGenerator;
 import org.glassfish.hk2.utilities.Binder;
+import org.jvnet.hk2.external.generator.ServiceLocatorGeneratorImpl;
 import org.vertx.java.core.Future;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -36,6 +38,7 @@ import org.vertx.java.platform.impl.java.CompilingClassLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * HK2 Verticle to lazy load the real verticle with DI
@@ -43,9 +46,10 @@ import java.util.List;
 public class HK2VerticleLoader extends Verticle {
 
     private final String main;
-    private final ClassLoader cl;
+    private ClassLoader cl;
     private Verticle realVerticle;
     private ServiceLocator locator;
+    private AtomicInteger counter = new AtomicInteger();
 
     public static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
     public static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
@@ -84,16 +88,17 @@ public class HK2VerticleLoader extends Verticle {
      */
     @Override
     public void stop() {
+
+        this.cl = null;
+
+        // Destroy the service locator
+        ServiceLocatorFactory.getInstance().destroy(locator);
+        locator = null;
+
         // Stop the real verticle
         if (realVerticle != null) {
             realVerticle.stop();
             realVerticle = null;
-        }
-
-        // Shutdown the service locator
-        if (locator != null) {
-            locator.shutdown();
-            locator = null;
         }
     }
 
@@ -148,8 +153,7 @@ public class HK2VerticleLoader extends Verticle {
         }
 
         // Each verticle factory will have it's own service locator instance
-        ServiceLocatorFactory factory = ServiceLocatorFactory.getInstance();
-        locator = factory.create(null);
+        locator = ServiceLocatorFactory.getInstance().create(null);
 
         bind(locator, new VertxBinder(vertx, container));
         for (Binder bootstrap : bootstraps) {
