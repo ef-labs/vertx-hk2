@@ -68,6 +68,9 @@ public class HK2VerticleFactory implements VerticleFactory {
 
     @Override
     public void close() {
+        this.vertx = null;
+        this.container = null;
+        this.cl = null;
     }
 
 }
