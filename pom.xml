@@ -10,7 +10,7 @@
 
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.1</version>
 
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
     <inceptionYear>2013</inceptionYear>
