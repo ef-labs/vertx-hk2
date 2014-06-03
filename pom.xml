@@ -17,7 +17,7 @@
 
     <properties>
         <!--Dependency versions-->
-        <hk2.version>2.2.0</hk2.version>
+        <hk2.version>2.3.0-b05</hk2.version>
     </properties>
 
     <dependencies>

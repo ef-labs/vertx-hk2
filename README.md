@@ -22,10 +22,10 @@ The vertx-mod-hk2 module configuration is as follows:
 
 
 To configure Vert.x to use the HK2VerticleFactory modify the langs.properties java entry like this:
-`java=com.englishtown~vertx-mod-hk2~1.6.1:com.englishtown.vertx.hk2.HK2VerticleFactory`
+`java=com.englishtown~vertx-mod-hk2~1.7.0-SNAPSHOT:com.englishtown.vertx.hk2.HK2VerticleFactory`
 
 or set a system property when running:
-`-Dvertx.langs.java=com.englishtown~vertx-mod-hk2~1.6.1:com.englishtown.vertx.hk2.HK2VerticleFactory`
+`-Dvertx.langs.java=com.englishtown~vertx-mod-hk2~1.7.0-SNAPSHOT:com.englishtown.vertx.hk2.HK2VerticleFactory`
 
 
 ## Example
