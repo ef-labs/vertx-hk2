@@ -1,6 +1,6 @@
 {
     "resident": true,
-    "description":"Provides a VerticleFactory that uses HK2 for dependency injection",
+    "description": "Provides a VerticleFactory that uses HK2 for dependency injection",
     "licenses": ["The MIT License"],
     "author": "Englishtown",
     "keywords": ["dependency injection", "DI", "CDI", "VerticleFactory", "HK2"],
