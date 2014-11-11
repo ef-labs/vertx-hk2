@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.englishtown</groupId>
         <artifactId>oss-parent-vertx</artifactId>
-        <version>1.4.0</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vertx-mod-hk2</artifactId>
     <packaging>jar</packaging>
-    <version>1.8.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <description>Provides a VerticleFactory that uses HK2 for dependency injection.</description>
     <inceptionYear>2013</inceptionYear>
@@ -39,19 +39,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
     <distributionManagement>
         <site>

@@ -1,42 +1,32 @@
 package com.englishtown.vertx.hk2.integration;
 
-import org.junit.Test;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.testtools.TestVerticle;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.test.core.VertxTestBase;
 
-import static org.vertx.testtools.VertxAssert.assertTrue;
-import static org.vertx.testtools.VertxAssert.testComplete;
+import org.junit.Test;
 
 /**
  * Integration test to show a module deployed with a injection constructor
  */
-public class IntegrationTestVerticle extends TestVerticle {
+public class IntegrationTestVerticle extends VertxTestBase {
 
     @Test
     public void testDependencyInjection_Compiled() throws Exception {
-
-        container.deployVerticle(DependencyInjectionVerticle.class.getName(), new Handler<AsyncResult<String>>() {
-            @Override
-            public void handle(AsyncResult<String> result) {
-                assertTrue(result.succeeded());
-                testComplete();
-            }
+        vertx.deployVerticle(DependencyInjectionVerticle.class.getName(), new DeploymentOptions(), ar -> {
+           assertTrue(ar.succeeded());
+           testComplete();
         });
-
+        await();
     }
 
     @Test
     public void testDependencyInjection_Uncompiled() throws Exception {
 
-        container.deployVerticle("UncompiledDIVerticle.java", new Handler<AsyncResult<String>>() {
-            @Override
-            public void handle(AsyncResult<String> result) {
-                assertTrue(result.succeeded());
-                testComplete();
-            }
+        vertx.deployVerticle("UncompiledDIVerticle.java",new DeploymentOptions(), ar -> {
+            assertTrue(ar.succeeded());
+            testComplete();
         });
-
-    }
+        await();
+   }
 
 }

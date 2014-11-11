@@ -23,54 +23,26 @@
 
 package com.englishtown.vertx.hk2;
 
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.platform.Container;
-import org.vertx.java.platform.Verticle;
-import org.vertx.java.platform.VerticleFactory;
+import io.vertx.core.Verticle;
+import io.vertx.core.spi.VerticleFactory;
 
 /**
- * Implements {@link VerticleFactory} using an HK2 verticle wrapper for dependency injection.
+ * Implements {@link io.vertx.core.spi.VerticleFactory} using an HK2 verticle wrapper for dependency injection.
  */
 public class HK2VerticleFactory implements VerticleFactory {
 
-    private Vertx vertx;
-    private Container container;
-    private ClassLoader cl;
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void init(Vertx vertx, Container container, ClassLoader cl) {
-        this.vertx = vertx;
-        this.container = container;
-        this.cl = cl;
+    public String prefix() {
+        return "java-hk2";
     }
 
     /**
      * {@inheritDoc}
-     */
+    */
     @Override
-    public Verticle createVerticle(String main) throws Exception {
-        Verticle verticle = new HK2VerticleLoader(main, cl);
-        verticle.setVertx(vertx);
-        verticle.setContainer(container);
-        return verticle;
-    }
-
-    @Override
-    public void reportException(Logger logger, Throwable t) {
-        if (logger != null) {
-            logger.error("Exception in HK2VerticleFactory", t);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.vertx = null;
-        this.container = null;
-        this.cl = null;
+    public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
+        verticleName = VerticleFactory.removePrefix(verticleName);
+        return new HK2VerticleLoader(verticleName, classLoader);
     }
 
 }

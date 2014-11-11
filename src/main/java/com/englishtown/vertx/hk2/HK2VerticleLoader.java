@@ -23,24 +23,30 @@
 
 package com.englishtown.vertx.hk2;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
+import io.vertx.core.Verticle;
+import io.vertx.core.impl.verticle.CompilingClassLoader;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.glassfish.hk2.api.DynamicConfiguration;
 import org.glassfish.hk2.api.DynamicConfigurationService;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.Binder;
-import org.vertx.java.core.Future;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Verticle;
-import org.vertx.java.platform.impl.java.CompilingClassLoader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * HK2 Verticle to lazy load the real verticle with DI
  */
-public class HK2VerticleLoader extends Verticle {
+public class HK2VerticleLoader extends AbstractVerticle {
+
+    private static final Logger logger = LoggerFactory.getLogger(HK2VerticleLoader.class);
 
     private final String main;
     private ClassLoader cl;
@@ -61,18 +67,23 @@ public class HK2VerticleLoader extends Verticle {
      * be considered started until the other modules and verticles have been started.
      *
      * @param startedResult When you are happy your verticle is started set the result
+     * @throws Exception 
      */
     @Override
-    public void start(Future<Void> startedResult) {
+    public void start(Future<Void> startedResult) throws Exception {
 
         // Create the real verticle
         try {
             realVerticle = createRealVerticle();
         } catch (Exception e) {
-            startedResult.setFailure(e);
+            startedResult.fail(e);
             return;
         }
 
+        // Init the verticle here since we need the vertx
+        // reference for the dependency injection. Init is called
+        // again by the DeploymentManager.
+        realVerticle.init(getVertx(), null);
         // Start the real verticle
         realVerticle.start(startedResult);
 
@@ -81,9 +92,10 @@ public class HK2VerticleLoader extends Verticle {
     /**
      * Vert.x calls the stop method when the verticle is undeployed.
      * Put any cleanup code for your verticle in here
+     * @throws Exception 
      */
     @Override
-    public void stop() {
+    public void stop() throws Exception {
 
         this.cl = null;
 
@@ -93,7 +105,7 @@ public class HK2VerticleLoader extends Verticle {
 
         // Stop the real verticle
         if (realVerticle != null) {
-            realVerticle.stop();
+            realVerticle.stop(Future.future());
             realVerticle = null;
         }
     }
@@ -112,15 +124,13 @@ public class HK2VerticleLoader extends Verticle {
             clazz = cl.loadClass(className);
         }
         Verticle verticle = createRealVerticle(clazz);
-        verticle.setVertx(vertx);
-        verticle.setContainer(container);
         return verticle;
     }
 
     private Verticle createRealVerticle(Class<?> clazz) throws Exception {
 
-        JsonObject config = container.config();
-        Object field = config.getField(CONFIG_BOOTSTRAP_BINDER_NAME);
+        JsonObject config = vertx.context().config();
+        Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
         JsonArray bootstrapNames;
         List<Binder> bootstraps = new ArrayList<>();
 
@@ -131,7 +141,7 @@ public class HK2VerticleLoader extends Verticle {
         }
 
         for (int i = 0; i < bootstrapNames.size(); i++) {
-            String bootstrapName = bootstrapNames.get(i);
+            String bootstrapName = bootstrapNames.getString(i);
             try {
                 Class bootstrapClass = cl.loadClass(bootstrapName);
                 Object obj = bootstrapClass.newInstance();
@@ -139,11 +149,11 @@ public class HK2VerticleLoader extends Verticle {
                 if (obj instanceof Binder) {
                     bootstraps.add((Binder) obj);
                 } else {
-                    container.logger().error("Class " + bootstrapName
+                    logger.error("Class " + bootstrapName
                             + " does not implement Binder.");
                 }
             } catch (ClassNotFoundException e) {
-                container.logger().error("HK2 bootstrap binder class " + bootstrapName
+                logger.error("HK2 bootstrap binder class " + bootstrapName
                         + " was not found.  Are you missing injection bindings?");
             }
         }
@@ -152,7 +162,7 @@ public class HK2VerticleLoader extends Verticle {
         // Passing a null name will not cache the locator in the factory
         locator = ServiceLocatorFactory.getInstance().create(null);
 
-        bind(locator, new VertxBinder(vertx, container));
+        bind(locator, new VertxBinder());
         for (Binder bootstrap : bootstraps) {
             bind(locator, bootstrap);
         }

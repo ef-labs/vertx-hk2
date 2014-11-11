@@ -21,16 +21,20 @@
  * THE SOFTWARE.
  */
 
-import com.englishtown.vertx.hk2.MyDependency;
-import org.vertx.java.platform.Verticle;
-
+import static org.junit.Assert.assertNotNull;
+import io.vertx.core.AbstractVerticle;
 import javax.inject.Inject;
 
-import static org.vertx.testtools.VertxAssert.assertNotNull;
+import com.englishtown.vertx.hk2.MyDependency;
 
-public class UncompiledDIVerticle extends Verticle {
+public class UncompiledDIVerticle extends AbstractVerticle {
 
     private final MyDependency myDependency;
+
+    //TODO Migration: Is this constructor really needed?
+    public UncompiledDIVerticle() {
+        this.myDependency = null;
+    }
 
     @Inject
     public UncompiledDIVerticle(MyDependency myDependency) {
