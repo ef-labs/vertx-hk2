@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/englishtown/vertx-mod-hk2.png)](https://travis-ci.org/englishtown/vertx-mod-hk2)
 
 # Vert.x HK2 Module
-Enable Verticle and Module dependency injection using HK2.  The default Vert.x Java VerticleFactory is replaced with
+Enable Verticle dependency injection using HK2.  The default Vert.x Java VerticleFactory is replaced with
 com.englishtown.vertx.hk2.HK2VerticleFactory for Verticle construction.
 
 

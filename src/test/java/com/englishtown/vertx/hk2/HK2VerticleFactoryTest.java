@@ -23,52 +23,19 @@
 
 package com.englishtown.vertx.hk2;
 
-import org.junit.Test;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.platform.Container;
-
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.vertx.core.Vertx;
 
-/**
- * Created with IntelliJ IDEA.
- * User: adriangonzalez
- * Date: 4/5/13
- * Time: 3:39 PM
- * To change this template use File | Settings | File Templates.
- */
+import org.junit.Test;
+
 public class HK2VerticleFactoryTest {
 
     @Test
     public void testCreateVerticle() throws Exception {
-
         HK2VerticleFactory factory = new HK2VerticleFactory();
-
-        JsonObject config = new JsonObject().putString("hk2_binder", "com.englishtown.vertx.hk2.BootstrapBinder");
-
-        Logger logger = mock(Logger.class);
         Vertx vertx = mock(Vertx.class);
-
-        Container container = mock(Container.class);
-        when(container.config()).thenReturn(config);
-        when(container.logger()).thenReturn(logger);
-
-        factory.init(vertx, container, this.getClass().getClassLoader());
-        factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle");
-
-    }
-
-    @Test
-    public void testReportException() throws Exception {
-
-        HK2VerticleFactory factory = new HK2VerticleFactory();
-        Logger logger = mock(Logger.class);
-
-        factory.reportException(null, null);
-        factory.reportException(logger, new RuntimeException());
-
+        factory.init(vertx);
+        factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle", this.getClass().getClassLoader());
     }
 
 }
