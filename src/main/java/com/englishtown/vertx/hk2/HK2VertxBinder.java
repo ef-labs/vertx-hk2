@@ -24,15 +24,17 @@
 package com.englishtown.vertx.hk2;
 
 import io.vertx.core.Vertx;
-
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 /**
- * HK2 {@link AbstractBinder} for vertx and container injections
+ * HK2 {@link AbstractBinder} for {@link io.vertx.core.Vertx} injections
  */
-class VertxBinder extends AbstractBinder {
+public class HK2VertxBinder extends AbstractBinder {
 
-    public VertxBinder() {
+    private final Vertx vertx;
+
+    public HK2VertxBinder(Vertx vertx) {
+        this.vertx = vertx;
     }
 
     /**
@@ -40,7 +42,6 @@ class VertxBinder extends AbstractBinder {
      */
     @Override
     protected void configure() {
-    	//TODO Migration: I think this could cause a problem since each vertx context instance is threadbound.
-        bind(Vertx.vertx()).to(Vertx.class);
+        bind(vertx).to(Vertx.class);
     }
 }

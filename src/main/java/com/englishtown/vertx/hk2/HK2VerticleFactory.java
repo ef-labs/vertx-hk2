@@ -31,14 +31,16 @@ import io.vertx.core.spi.VerticleFactory;
  */
 public class HK2VerticleFactory implements VerticleFactory {
 
+    public static final String PREFIX = "java-hk2";
+
     @Override
     public String prefix() {
-        return "java-hk2";
+        return PREFIX;
     }
 
     /**
      * {@inheritDoc}
-    */
+     */
     @Override
     public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
         verticleName = VerticleFactory.removePrefix(verticleName);

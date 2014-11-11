@@ -31,34 +31,32 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.glassfish.hk2.api.DynamicConfiguration;
-import org.glassfish.hk2.api.DynamicConfigurationService;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.Binder;
+import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * HK2 Verticle to lazy load the real verticle with DI
  */
 public class HK2VerticleLoader extends AbstractVerticle {
 
-    private static final Logger logger = LoggerFactory.getLogger(HK2VerticleLoader.class);
+    private final Logger logger = LoggerFactory.getLogger(HK2VerticleLoader.class);
 
-    private final String main;
-    private ClassLoader cl;
+    private final String verticleName;
+    private ClassLoader classLoader;
     private Verticle realVerticle;
     private ServiceLocator locator;
 
     public static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
     public static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
 
-    public HK2VerticleLoader(String main, ClassLoader cl) {
-        this.main = main;
-        this.cl = cl;
+    public HK2VerticleLoader(String verticleName, ClassLoader classLoader) {
+        this.verticleName = verticleName;
+        this.classLoader = classLoader;
     }
 
     /**
@@ -67,7 +65,7 @@ public class HK2VerticleLoader extends AbstractVerticle {
      * be considered started until the other modules and verticles have been started.
      *
      * @param startedResult When you are happy your verticle is started set the result
-     * @throws Exception 
+     * @throws Exception
      */
     @Override
     public void start(Future<Void> startedResult) throws Exception {
@@ -80,11 +78,8 @@ public class HK2VerticleLoader extends AbstractVerticle {
             return;
         }
 
-        // Init the verticle here since we need the vertx
-        // reference for the dependency injection. Init is called
-        // again by the DeploymentManager.
-        realVerticle.init(getVertx(), null);
-        // Start the real verticle
+        // Init and start the real verticle
+        realVerticle.init(vertx, context);
         realVerticle.start(startedResult);
 
     }
@@ -92,12 +87,13 @@ public class HK2VerticleLoader extends AbstractVerticle {
     /**
      * Vert.x calls the stop method when the verticle is undeployed.
      * Put any cleanup code for your verticle in here
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Override
-    public void stop() throws Exception {
+    public void stop(Future<Void> stopFuture) throws Exception {
 
-        this.cl = null;
+        this.classLoader = null;
 
         // Destroy the service locator
         ServiceLocatorFactory.getInstance().destroy(locator);
@@ -105,23 +101,25 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
         // Stop the real verticle
         if (realVerticle != null) {
-            realVerticle.stop(Future.future());
+            realVerticle.stop(stopFuture);
             realVerticle = null;
         }
     }
 
+    public String getVerticleName() {
+        return verticleName;
+    }
+
     public Verticle createRealVerticle() throws Exception {
-        String className = main;
+        String className = verticleName;
         Class<?> clazz;
 
-        if (isJavaSource(main)) {
-            // TODO - is this right???
-            // Don't we want one CompilingClassLoader per instance of this?
-            CompilingClassLoader compilingLoader = new CompilingClassLoader(cl, main);
+        if (className.endsWith(".java")) {
+            CompilingClassLoader compilingLoader = new CompilingClassLoader(classLoader, className);
             className = compilingLoader.resolveMainClassName();
             clazz = compilingLoader.loadClass(className);
         } else {
-            clazz = cl.loadClass(className);
+            clazz = classLoader.loadClass(className);
         }
         Verticle verticle = createRealVerticle(clazz);
         return verticle;
@@ -129,7 +127,7 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
     private Verticle createRealVerticle(Class<?> clazz) throws Exception {
 
-        JsonObject config = vertx.context().config();
+        JsonObject config = context.config();
         Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
         JsonArray bootstrapNames;
         List<Binder> bootstraps = new ArrayList<>();
@@ -143,7 +141,7 @@ public class HK2VerticleLoader extends AbstractVerticle {
         for (int i = 0; i < bootstrapNames.size(); i++) {
             String bootstrapName = bootstrapNames.getString(i);
             try {
-                Class bootstrapClass = cl.loadClass(bootstrapName);
+                Class bootstrapClass = classLoader.loadClass(bootstrapName);
                 Object obj = bootstrapClass.newInstance();
 
                 if (obj instanceof Binder) {
@@ -162,26 +160,10 @@ public class HK2VerticleLoader extends AbstractVerticle {
         // Passing a null name will not cache the locator in the factory
         locator = ServiceLocatorFactory.getInstance().create(null);
 
-        bind(locator, new VertxBinder());
-        for (Binder bootstrap : bootstraps) {
-            bind(locator, bootstrap);
-        }
+        bootstraps.add(0, new HK2VertxBinder(vertx));
+        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[]{}));
 
         return (Verticle) locator.createAndInitialize(clazz);
-    }
-
-    private boolean isJavaSource(String main) {
-        return main.endsWith(".java");
-    }
-
-    private static void bind(ServiceLocator locator, Binder binder) {
-        DynamicConfigurationService dcs = locator.getService(DynamicConfigurationService.class);
-        DynamicConfiguration dc = dcs.createDynamicConfiguration();
-
-        locator.inject(binder);
-        binder.bind(dc);
-
-        dc.commit();
     }
 
 }

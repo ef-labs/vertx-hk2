@@ -23,19 +23,45 @@
 
 package com.englishtown.vertx.hk2;
 
-import static org.mockito.Mockito.mock;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
-
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+@RunWith(MockitoJUnitRunner.class)
 public class HK2VerticleFactoryTest {
+
+    private HK2VerticleFactory factory;
+
+    @Mock
+    Vertx vertx;
+
+    @Before
+    public void setUp() throws Exception {
+        factory = new HK2VerticleFactory();
+        factory.init(vertx);
+    }
+
+    @Test
+    public void testPrefix() {
+        assertEquals("java-hk2", factory.prefix());
+    }
 
     @Test
     public void testCreateVerticle() throws Exception {
-        HK2VerticleFactory factory = new HK2VerticleFactory();
-        Vertx vertx = mock(Vertx.class);
-        factory.init(vertx);
-        factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle", this.getClass().getClassLoader());
+        String identifier = HK2VerticleFactory.PREFIX + ":" + TestHK2Verticle.class.getName();
+        Verticle verticle = factory.createVerticle(identifier, this.getClass().getClassLoader());
+        assertThat(verticle, instanceOf(HK2VerticleLoader.class));
+
+        HK2VerticleLoader loader = (HK2VerticleLoader) verticle;
+        assertEquals(TestHK2Verticle.class.getName(), loader.getVerticleName());
     }
 
 }
