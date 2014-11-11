@@ -23,14 +23,23 @@
 
 package com.englishtown.vertx.hk2;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Container;
+import org.vertx.java.platform.Verticle;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,24 +48,39 @@ import static org.mockito.Mockito.when;
  * Time: 3:39 PM
  * To change this template use File | Settings | File Templates.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class HK2VerticleFactoryTest {
+
+    JsonObject config = new JsonObject();
+
+    @Mock
+    Vertx vertx;
+    @Mock
+    Container container;
+    @Mock
+    Logger logger;
+
+    @Before
+    public void setUp() throws Exception {
+
+        when(container.config()).thenReturn(config);
+        when(container.logger()).thenReturn(logger);
+
+    }
 
     @Test
     public void testCreateVerticle() throws Exception {
 
         HK2VerticleFactory factory = new HK2VerticleFactory();
 
-        JsonObject config = new JsonObject().putString("hk2_binder", "com.englishtown.vertx.hk2.BootstrapBinder");
-
-        Logger logger = mock(Logger.class);
-        Vertx vertx = mock(Vertx.class);
-
-        Container container = mock(Container.class);
-        when(container.config()).thenReturn(config);
-        when(container.logger()).thenReturn(logger);
+        config.putString("hk2_binder", "com.englishtown.vertx.hk2.BootstrapBinder");
 
         factory.init(vertx, container, this.getClass().getClassLoader());
-        factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle");
+        Verticle verticle = factory.createVerticle("com.englishtown.vertx.hk2.TestHK2Verticle");
+
+        assertThat(verticle, instanceOf(HK2VerticleLoader.class));
+        assertEquals(container, verticle.getContainer());
+        assertEquals(vertx, verticle.getVertx());
 
     }
 
@@ -64,10 +88,13 @@ public class HK2VerticleFactoryTest {
     public void testReportException() throws Exception {
 
         HK2VerticleFactory factory = new HK2VerticleFactory();
-        Logger logger = mock(Logger.class);
 
         factory.reportException(null, null);
-        factory.reportException(logger, new RuntimeException());
+        verifyZeroInteractions(logger);
+
+        RuntimeException t = new RuntimeException();
+        factory.reportException(logger, t);
+        verify(logger).error(anyString(), eq(t));
 
     }
 
