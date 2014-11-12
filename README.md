@@ -1,8 +1,7 @@
 [![Build Status](https://travis-ci.org/englishtown/vertx-mod-hk2.png)](https://travis-ci.org/englishtown/vertx-mod-hk2)
 
 # Vert.x HK2 Module
-Enable Verticle dependency injection using HK2.  The default Vert.x Java VerticleFactory is replaced with
-com.englishtown.vertx.hk2.HK2VerticleFactory for Verticle construction.
+Enable Verticle dependency injection using HK2.  Deploy your verticle with the `java-hk2:` prefix to use the `HK2VerticleFactory`.
 
 
 ## License
@@ -20,12 +19,6 @@ The vertx-mod-hk2 module configuration is as follows:
 
 * `hk2_binder` -  The name of the HK2 binder class which contains the injection configuration.  Default is `"com.englishtown.vertx.hk2.BootstrapBinder"`.  You can also provide an array of binder classes.
 
-
-To configure Vert.x to use the HK2VerticleFactory modify the langs.properties java entry like this:
-`java=com.englishtown~vertx-mod-hk2~1.8.0-SNAPSHOT:com.englishtown.vertx.hk2.HK2VerticleFactory`
-
-or set a system property when running:
-`-Dvertx.langs.java=com.englishtown~vertx-mod-hk2~1.8.0-SNAPSHOT:com.englishtown.vertx.hk2.HK2VerticleFactory`
 
 
 ## Example
