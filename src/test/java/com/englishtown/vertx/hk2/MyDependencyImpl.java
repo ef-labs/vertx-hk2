@@ -26,5 +26,5 @@ package com.englishtown.vertx.hk2;
 /**
  * @author adriangonzalez
  */
-public class DefaultMyDependency implements MyDependency {
+public class MyDependencyImpl implements MyDependency {
 }

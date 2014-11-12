@@ -23,7 +23,7 @@
 
 package com.englishtown.vertx.hk2.integration;
 
-import com.englishtown.vertx.hk2.DefaultMyDependency;
+import com.englishtown.vertx.hk2.MyDependencyImpl;
 import com.englishtown.vertx.hk2.MyDependency;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
@@ -33,6 +33,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 public class CustomBinder extends AbstractBinder {
     @Override
     protected void configure() {
-        bind(DefaultMyDependency.class).to(MyDependency.class);
+        bind(MyDependencyImpl.class).to(MyDependency.class);
     }
 }
