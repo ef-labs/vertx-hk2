@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/englishtown/vertx-mod-hk2.png)](https://travis-ci.org/englishtown/vertx-mod-hk2)
+[![Build Status](https://travis-ci.org/englishtown/vertx-hk2.png)](https://travis-ci.org/englishtown/vertx-hk2)
 
-# Vert.x HK2 Module
+# Vert.x HK2 Extension
 Enable Verticle dependency injection using HK2.  Deploy your verticle with the `java-hk2:` prefix to use the `HK2VerticleFactory`.
 
 
