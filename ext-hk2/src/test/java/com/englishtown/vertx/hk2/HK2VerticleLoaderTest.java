@@ -65,14 +65,14 @@ public class HK2VerticleLoaderTest {
     @Before
     public void setUp() {
         MockLogDelegateFactory.reset();
-        when(vertx.context()).thenReturn(context);
+        when(Vertx.currentContext()).thenReturn(context);
         when(context.config()).thenReturn(config);
     }
 
     private HK2VerticleLoader createLoader(String main) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         HK2VerticleLoader loader = new HK2VerticleLoader(main, cl);
-        loader.init(vertx, vertx.context());
+        loader.init(vertx, Vertx.currentContext());
         return loader;
     }
 
