@@ -65,14 +65,14 @@ public class HK2VerticleLoaderTest {
     @Before
     public void setUp() {
         MockLogDelegateFactory.reset();
-        when(vertx.context()).thenReturn(context);
+        when(vertx.getOrCreateContext()).thenReturn(context);
         when(context.config()).thenReturn(config);
     }
 
     private HK2VerticleLoader createLoader(String main) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         HK2VerticleLoader loader = new HK2VerticleLoader(main, cl);
-        loader.init(vertx, vertx.context());
+        loader.init(vertx, vertx.getOrCreateContext());
         return loader;
     }
 
@@ -85,7 +85,7 @@ public class HK2VerticleLoaderTest {
         loader.start(future);
 
         verify(future).complete();
-        verify(future, never()).fail(any());
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -100,7 +100,7 @@ public class HK2VerticleLoaderTest {
         loader.start(future);
 
         verify(future).complete();
-        verify(future, never()).fail(any());
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -117,7 +117,7 @@ public class HK2VerticleLoaderTest {
         loader.start(future);
 
         verify(future).complete();
-        verify(future, never()).fail(any());
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -136,7 +136,7 @@ public class HK2VerticleLoaderTest {
         loader.start(future);
 
         verify(future).complete();
-        verify(future, never()).fail(any());
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -154,7 +154,7 @@ public class HK2VerticleLoaderTest {
         loader.start(future);
 
         verify(future, never()).complete();
-        verify(future).fail(any());
+        verify(future).fail(any(Throwable.class));
         verify(logger).error(eq("Class " + binder + " does not implement Binder."));
         loader.stop();
 
@@ -172,7 +172,7 @@ public class HK2VerticleLoaderTest {
         loader.start(future);
 
         verify(future, never()).complete();
-        verify(future).fail(any());
+        verify(future).fail(any(Throwable.class));
         verify(logger).error(eq("HK2 bootstrap binder class " + binder + " was not found.  Are you missing injection bindings?"));
         loader.stop();
 
