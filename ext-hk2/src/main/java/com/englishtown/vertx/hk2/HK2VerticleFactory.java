@@ -24,7 +24,10 @@
 package com.englishtown.vertx.hk2;
 
 import io.vertx.core.Verticle;
+import io.vertx.core.impl.IsolatingClassLoader;
 import io.vertx.core.spi.VerticleFactory;
+
+import java.lang.reflect.Constructor;
 
 /**
  * Implements {@link io.vertx.core.spi.VerticleFactory} using an HK2 verticle wrapper for dependency injection.
@@ -44,7 +47,18 @@ public class HK2VerticleFactory implements VerticleFactory {
     @Override
     public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
         verticleName = VerticleFactory.removePrefix(verticleName);
-        return new HK2VerticleLoader(verticleName, classLoader);
+
+        // Use the provided class loader to create an instance of HK2VerticleLoader.  This is necessary when working with vert.x IsolatingClassLoader
+        @SuppressWarnings("unchecked")
+        Class<Verticle> loader = (Class<Verticle>) classLoader.loadClass(HK2VerticleLoader.class.getName());
+        Constructor<Verticle> ctor = loader.getConstructor(String.class, ClassLoader.class);
+
+        if (ctor == null) {
+            throw new IllegalStateException("Could not find HK2VerticleLoad constructor");
+        }
+
+        return ctor.newInstance(verticleName, classLoader);
+
     }
 
 }
