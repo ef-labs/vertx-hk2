@@ -21,20 +21,10 @@
  * THE SOFTWARE.
  */
 
-import com.englishtown.vertx.hk2.MyDependency;
-import org.vertx.java.platform.Verticle;
+package com.englishtown.vertx.hk2;
 
-import javax.inject.Inject;
-
-import static org.vertx.testtools.VertxAssert.assertNotNull;
-
-public class UncompiledDIVerticle extends Verticle {
-
-    private final MyDependency myDependency;
-
-    @Inject
-    public UncompiledDIVerticle(MyDependency myDependency) {
-        this.myDependency = myDependency;
-        assertNotNull(myDependency);
-    }
+/**
+ * @author adriangonzalez
+ */
+public class DefaultMyDependency implements MyDependency {
 }

@@ -23,21 +23,18 @@
 
 package com.englishtown.vertx.hk2;
 
+import io.vertx.core.Vertx;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.platform.Container;
 
 /**
- * HK2 {@link AbstractBinder} for vertx and container injections
+ * HK2 {@link AbstractBinder} for {@link io.vertx.core.Vertx} injections
  */
-class VertxBinder extends AbstractBinder {
+public class HK2VertxBinder extends AbstractBinder {
 
     private final Vertx vertx;
-    private final Container container;
 
-    public VertxBinder(Vertx vertx, Container container) {
+    public HK2VertxBinder(Vertx vertx) {
         this.vertx = vertx;
-        this.container = container;
     }
 
     /**
@@ -46,6 +43,5 @@ class VertxBinder extends AbstractBinder {
     @Override
     protected void configure() {
         bind(vertx).to(Vertx.class);
-        bind(container).to(Container.class);
     }
 }

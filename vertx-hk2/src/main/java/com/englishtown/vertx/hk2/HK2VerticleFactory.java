@@ -23,54 +23,42 @@
 
 package com.englishtown.vertx.hk2;
 
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.platform.Container;
-import org.vertx.java.platform.Verticle;
-import org.vertx.java.platform.VerticleFactory;
+import io.vertx.core.Verticle;
+import io.vertx.core.impl.IsolatingClassLoader;
+import io.vertx.core.spi.VerticleFactory;
+
+import java.lang.reflect.Constructor;
 
 /**
- * Implements {@link VerticleFactory} using an HK2 verticle wrapper for dependency injection.
+ * Implements {@link io.vertx.core.spi.VerticleFactory} using an HK2 verticle wrapper for dependency injection.
  */
 public class HK2VerticleFactory implements VerticleFactory {
 
-    private Vertx vertx;
-    private Container container;
-    private ClassLoader cl;
+    public static final String PREFIX = "java-hk2";
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void init(Vertx vertx, Container container, ClassLoader cl) {
-        this.vertx = vertx;
-        this.container = container;
-        this.cl = cl;
+    public String prefix() {
+        return PREFIX;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Verticle createVerticle(String main) throws Exception {
-        Verticle verticle = new HK2VerticleLoader(main, cl);
-        verticle.setVertx(vertx);
-        verticle.setContainer(container);
-        return verticle;
-    }
+    public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
+        verticleName = VerticleFactory.removePrefix(verticleName);
 
-    @Override
-    public void reportException(Logger logger, Throwable t) {
-        if (logger != null) {
-            logger.error("Exception in HK2VerticleFactory", t);
+        // Use the provided class loader to create an instance of HK2VerticleLoader.  This is necessary when working with vert.x IsolatingClassLoader
+        @SuppressWarnings("unchecked")
+        Class<Verticle> loader = (Class<Verticle>) classLoader.loadClass(HK2VerticleLoader.class.getName());
+        Constructor<Verticle> ctor = loader.getConstructor(String.class, ClassLoader.class);
+
+        if (ctor == null) {
+            throw new IllegalStateException("Could not find HK2VerticleLoad constructor");
         }
-    }
 
-    @Override
-    public void close() {
-        this.vertx = null;
-        this.container = null;
-        this.cl = null;
+        return ctor.newInstance(verticleName, classLoader);
+
     }
 
 }

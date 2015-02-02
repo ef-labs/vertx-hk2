@@ -25,19 +25,20 @@ package com.englishtown.vertx.hk2;
 
 import com.englishtown.vertx.hk2.integration.CustomBinder;
 import com.englishtown.vertx.hk2.integration.DependencyInjectionVerticle;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.impl.LogDelegate;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.impl.DefaultFutureResult;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.platform.Container;
 
-import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -46,30 +47,32 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class HK2VerticleLoaderTest {
 
-    JsonObject config = new JsonObject();
+    private JsonObject config = new JsonObject();
+    private static LogDelegate logger;
 
     @Mock
     Vertx vertx;
     @Mock
-    Container container;
+    Context context;
     @Mock
-    Logger logger;
+    Future<Void> future;
+
+    @BeforeClass
+    public static void setupOnce() {
+        logger = MockLogDelegateFactory.getLogDelegate();
+    }
 
     @Before
     public void setUp() {
-
-        when(container.logger()).thenReturn(logger);
-        when(container.config()).thenReturn(config);
-
+        MockLogDelegateFactory.reset();
+        when(vertx.getOrCreateContext()).thenReturn(context);
+        when(context.config()).thenReturn(config);
     }
 
     private HK2VerticleLoader createLoader(String main) {
-
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         HK2VerticleLoader loader = new HK2VerticleLoader(main, cl);
-        loader.setContainer(container);
-        loader.setVertx(vertx);
-
+        loader.init(vertx, vertx.getOrCreateContext());
         return loader;
     }
 
@@ -77,12 +80,12 @@ public class HK2VerticleLoaderTest {
     public void testStart_Compiled() throws Exception {
 
         String main = DependencyInjectionVerticle.class.getName();
-        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
 
         HK2VerticleLoader loader = createLoader(main);
-        loader.start(vr);
+        loader.start(future);
 
-        assertTrue(vr.succeeded());
+        verify(future).complete();
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -92,12 +95,12 @@ public class HK2VerticleLoaderTest {
     public void testStart_Uncompiled() throws Exception {
 
         String main = "UncompiledDIVerticle.java";
-        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
 
         HK2VerticleLoader loader = createLoader(main);
-        loader.start(vr);
+        loader.start(future);
 
-        assertTrue(vr.succeeded());
+        verify(future).complete();
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -106,15 +109,15 @@ public class HK2VerticleLoaderTest {
     @Test
     public void testStart_Custom_Binder() throws Exception {
 
-        config.putString("hk2_binder", CustomBinder.class.getName());
+        config.put("hk2_binder", CustomBinder.class.getName());
 
         String main = DependencyInjectionVerticle.class.getName();
-        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
 
         HK2VerticleLoader loader = createLoader(main);
-        loader.start(vr);
+        loader.start(future);
 
-        assertTrue(vr.succeeded());
+        verify(future).complete();
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -123,17 +126,17 @@ public class HK2VerticleLoaderTest {
     @Test
     public void testStart_Custom_Binder_Array() throws Exception {
 
-        config.putArray("hk2_binder", new JsonArray()
-                .addString(CustomBinder.class.getName())
-                .addString(BootstrapBinder.class.getName()));
+        config.put("hk2_binder", new JsonArray()
+                .add(CustomBinder.class.getName())
+                .add(BootstrapBinder.class.getName()));
 
         String main = DependencyInjectionVerticle.class.getName();
-        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
 
         HK2VerticleLoader loader = createLoader(main);
-        loader.start(vr);
+        loader.start(future);
 
-        assertTrue(vr.succeeded());
+        verify(future).complete();
+        verify(future, never()).fail(any(Throwable.class));
         verifyZeroInteractions(logger);
         loader.stop();
 
@@ -143,16 +146,15 @@ public class HK2VerticleLoaderTest {
     public void testStart_Not_A_Binder() throws Exception {
 
         String binder = String.class.getName();
-        config.putString("hk2_binder", binder);
+        config.put("hk2_binder", binder);
 
         String main = DependencyInjectionVerticle.class.getName();
-        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
 
         HK2VerticleLoader loader = createLoader(main);
-        loader.start(vr);
+        loader.start(future);
 
-        assertFalse(vr.succeeded());
-        assertNotNull(vr.cause());
+        verify(future, never()).complete();
+        verify(future).fail(any(Throwable.class));
         verify(logger).error(eq("Class " + binder + " does not implement Binder."));
         loader.stop();
 
@@ -162,18 +164,16 @@ public class HK2VerticleLoaderTest {
     public void testStart_Class_Not_Found_Binder() throws Exception {
 
         String binder = "com.englishtown.INVALID_BINDER";
-        config.putString("hk2_binder", binder);
+        config.put("hk2_binder", binder);
 
         String main = DependencyInjectionVerticle.class.getName();
-        DefaultFutureResult<Void> vr = new DefaultFutureResult<>();
 
         HK2VerticleLoader loader = createLoader(main);
-        loader.start(vr);
+        loader.start(future);
 
-        assertFalse(vr.succeeded());
-        assertNotNull(vr.cause());
-        verify(logger).error(eq("HK2 bootstrap binder class " + binder
-                + " was not found.  Are you missing injection bindings?"));
+        verify(future, never()).complete();
+        verify(future).fail(any(Throwable.class));
+        verify(logger).error(eq("HK2 bootstrap binder class " + binder + " was not found.  Are you missing injection bindings?"));
         loader.stop();
 
     }

@@ -1,16 +1,16 @@
 package com.englishtown.vertx.hk2.integration;
 
 import com.englishtown.vertx.hk2.MyDependency;
-import org.vertx.java.platform.Verticle;
+import io.vertx.core.AbstractVerticle;
 
 import javax.inject.Inject;
 
-import static org.vertx.testtools.VertxAssert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Verticle with dependencies injected
  */
-public class DependencyInjectionVerticle extends Verticle {
+public class DependencyInjectionVerticle extends AbstractVerticle {
 
     private final MyDependency myDependency;
 
