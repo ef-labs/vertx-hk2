@@ -48,6 +48,8 @@ public class HK2VerticleFactory implements VerticleFactory {
     public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
         verticleName = VerticleFactory.removePrefix(verticleName);
 
+        classLoader = getClassLoader(classLoader);
+
         // Use the provided class loader to create an instance of HK2VerticleLoader.  This is necessary when working with vert.x IsolatingClassLoader
         @SuppressWarnings("unchecked")
         Class<Verticle> loader = (Class<Verticle>) classLoader.loadClass(HK2VerticleLoader.class.getName());
@@ -58,6 +60,16 @@ public class HK2VerticleFactory implements VerticleFactory {
         }
 
         return ctor.newInstance(verticleName, classLoader);
+
+    }
+
+    protected ClassLoader getClassLoader(ClassLoader classLoader) {
+
+        if (classLoader instanceof IsolatingClassLoader) {
+            return new WrappedIsolatingClassLoader((IsolatingClassLoader) classLoader);
+        } else {
+            return classLoader;
+        }
 
     }
 
