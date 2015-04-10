@@ -24,7 +24,6 @@
 package com.englishtown.vertx.hk2;
 
 import io.vertx.core.Verticle;
-import io.vertx.core.impl.IsolatingClassLoader;
 import io.vertx.core.spi.VerticleFactory;
 
 import java.lang.reflect.Constructor;
