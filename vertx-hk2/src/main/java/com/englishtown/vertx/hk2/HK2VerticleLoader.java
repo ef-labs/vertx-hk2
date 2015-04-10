@@ -161,7 +161,7 @@ public class HK2VerticleLoader extends AbstractVerticle {
         locator = ServiceLocatorFactory.getInstance().create(null);
 
         bootstraps.add(0, new HK2VertxBinder(vertx));
-        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[]{}));
+        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
 
         return (Verticle) locator.createAndInitialize(clazz);
     }
