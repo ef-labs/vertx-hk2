@@ -95,15 +95,20 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
         this.classLoader = null;
 
-        // Destroy the service locator
-        ServiceLocatorFactory.getInstance().destroy(locator);
-        locator = null;
+        try {
+            // Stop the real verticle
+            if (realVerticle != null) {
+                realVerticle.stop(stopFuture);
+                realVerticle = null;
+            }
 
-        // Stop the real verticle
-        if (realVerticle != null) {
-            realVerticle.stop(stopFuture);
-            realVerticle = null;
+        } finally {
+            // Destroy the service locator
+            ServiceLocatorFactory.getInstance().destroy(locator);
+            locator = null;
+
         }
+
     }
 
     public String getVerticleName() {
