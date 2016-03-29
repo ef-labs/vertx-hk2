@@ -23,9 +23,7 @@
 
 package com.englishtown.vertx.hk2;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.Verticle;
+import io.vertx.core.*;
 import io.vertx.core.impl.verticle.CompilingClassLoader;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -48,15 +46,41 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
     private final String verticleName;
     private ClassLoader classLoader;
+    private ServiceLocator parent;
     private Verticle realVerticle;
     private ServiceLocator locator;
 
     public static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
     public static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
 
-    public HK2VerticleLoader(String verticleName, ClassLoader classLoader) {
+    public HK2VerticleLoader(String verticleName, ClassLoader classLoader, ServiceLocator parent) {
         this.verticleName = verticleName;
         this.classLoader = classLoader;
+        this.parent = parent;
+    }
+
+    /**
+     * Initialise the verticle.<p>
+     * This is called by Vert.x when the verticle instance is deployed. Don't call it yourself.
+     *
+     * @param vertx   the deploying Vert.x instance
+     * @param context the context of the verticle
+     */
+    @Override
+    public void init(Vertx vertx, Context context) {
+        super.init(vertx, context);
+
+        try {
+            // Create the real verticle and init
+            realVerticle = createRealVerticle();
+            realVerticle.init(vertx, context);
+        } catch (Throwable t) {
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            }
+            throw new RuntimeException(t);
+        }
+
     }
 
     /**
@@ -69,19 +93,8 @@ public class HK2VerticleLoader extends AbstractVerticle {
      */
     @Override
     public void start(Future<Void> startedResult) throws Exception {
-
-        // Create the real verticle
-        try {
-            realVerticle = createRealVerticle();
-        } catch (Exception e) {
-            startedResult.fail(e);
-            return;
-        }
-
-        // Init and start the real verticle
-        realVerticle.init(vertx, context);
+        // Start the real verticle
         realVerticle.start(startedResult);
-
     }
 
     /**
@@ -93,7 +106,8 @@ public class HK2VerticleLoader extends AbstractVerticle {
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
 
-        this.classLoader = null;
+        classLoader = null;
+        parent = null;
 
         try {
             // Stop the real verticle
@@ -132,7 +146,7 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
     private Verticle createRealVerticle(Class<?> clazz) throws Exception {
 
-        JsonObject config = context.config();
+        JsonObject config = config();
         Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
         JsonArray bootstrapNames;
         List<Binder> bootstraps = new ArrayList<>();
@@ -163,10 +177,10 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
         // Each verticle factory will have it's own service locator instance
         // Passing a null name will not cache the locator in the factory
-        locator = ServiceLocatorFactory.getInstance().create(null);
-
-        bootstraps.add(0, new HK2VertxBinder(vertx));
-        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
+        locator = ServiceLocatorFactory.getInstance().create(null, parent);
+        if (!bootstraps.isEmpty()) {
+            ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
+        }
 
         return (Verticle) locator.createAndInitialize(clazz);
     }
