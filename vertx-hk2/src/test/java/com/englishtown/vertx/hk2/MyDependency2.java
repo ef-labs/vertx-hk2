@@ -23,5 +23,5 @@
 
 package com.englishtown.vertx.hk2;
 
-public interface MyDependency {
+public interface MyDependency2 {
 }

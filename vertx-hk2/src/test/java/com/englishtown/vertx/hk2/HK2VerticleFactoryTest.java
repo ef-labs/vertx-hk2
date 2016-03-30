@@ -35,6 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HK2VerticleFactoryTest {
@@ -69,7 +70,7 @@ public class HK2VerticleFactoryTest {
     public void testSetLocator() throws Exception {
 
         ServiceLocator original = factory.getLocator();
-        assertNotNull(original);
+        assertNull(original);
 
         ServiceLocator locator = mock(ServiceLocator.class);
         factory.setLocator(locator);
@@ -81,15 +82,11 @@ public class HK2VerticleFactoryTest {
     @Test
     public void testClose() throws Exception {
 
-        ServiceLocator locator1 = factory.getLocator();
-        assertEquals(locator1, factory.getLocator());
-
+        ServiceLocator locator = mock(ServiceLocator.class);
+        factory.setLocator(locator);
         factory.close();
 
-        // Can't mock the locator so can't easily verify close() was called...
-        // Just check a different locator instance was provided
-        ServiceLocator locator2 = factory.getLocator();
-        assertNotEquals(locator1, locator2);
+        verify(locator).shutdown();
 
     }
 

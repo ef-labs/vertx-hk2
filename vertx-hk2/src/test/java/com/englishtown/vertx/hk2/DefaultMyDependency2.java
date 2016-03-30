@@ -23,5 +23,5 @@
 
 package com.englishtown.vertx.hk2;
 
-public interface MyDependency {
+public class DefaultMyDependency2 implements MyDependency2 {
 }

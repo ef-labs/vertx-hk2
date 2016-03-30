@@ -98,7 +98,7 @@ public class HK2VerticleFactory implements VerticleFactory {
     }
 
     protected ServiceLocator createLocator() {
-        return ServiceLocatorFactory.getInstance().create(null);
+        return null;
     }
 
 }
