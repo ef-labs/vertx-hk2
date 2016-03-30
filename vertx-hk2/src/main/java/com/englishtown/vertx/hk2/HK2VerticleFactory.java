@@ -24,16 +24,11 @@
 package com.englishtown.vertx.hk2;
 
 import io.vertx.core.Verticle;
-import io.vertx.core.Vertx;
 import io.vertx.core.spi.VerticleFactory;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
-import org.glassfish.hk2.utilities.Binder;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implements {@link io.vertx.core.spi.VerticleFactory} using an HK2 verticle wrapper for dependency injection.
@@ -42,22 +37,11 @@ public class HK2VerticleFactory implements VerticleFactory {
 
     public static final String PREFIX = "java-hk2";
 
-    private Vertx vertx;
     private ServiceLocator locator;
 
     @Override
     public String prefix() {
         return PREFIX;
-    }
-
-    /**
-     * Initialise the factory
-     *
-     * @param vertx The Vert.x instance
-     */
-    @Override
-    public void init(Vertx vertx) {
-        this.vertx = vertx;
     }
 
     /**
@@ -114,12 +98,7 @@ public class HK2VerticleFactory implements VerticleFactory {
     }
 
     protected ServiceLocator createLocator() {
-
-        // Add vert.x binder
-        List<Binder> binders = new ArrayList<>();
-        binders.add(new HK2VertxBinder(vertx));
-
-        return ServiceLocatorUtilities.bind(binders.toArray(new Binder[binders.size()]));
+        return ServiceLocatorFactory.getInstance().create(null);
     }
 
 }

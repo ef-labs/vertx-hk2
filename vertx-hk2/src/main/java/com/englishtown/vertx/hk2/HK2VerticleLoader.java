@@ -178,9 +178,9 @@ public class HK2VerticleLoader extends AbstractVerticle {
         // Each verticle factory will have it's own service locator instance
         // Passing a null name will not cache the locator in the factory
         locator = ServiceLocatorFactory.getInstance().create(null, parent);
-        if (!bootstraps.isEmpty()) {
-            ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
-        }
+
+        bootstraps.add(0, new HK2VertxBinder(vertx));
+        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
 
         return (Verticle) locator.createAndInitialize(clazz);
     }
