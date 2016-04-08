@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright © 2013 Englishtown <opensource@englishtown.com>
+ * Copyright © 2016 Englishtown <opensource@englishtown.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -23,12 +23,5 @@
 
 package com.englishtown.vertx.hk2;
 
-/**
- * Created with IntelliJ IDEA.
- * User: adriangonzalez
- * Date: 4/5/13
- * Time: 3:49 PM
- * To change this template use File | Settings | File Templates.
- */
 public interface MyDependency {
 }

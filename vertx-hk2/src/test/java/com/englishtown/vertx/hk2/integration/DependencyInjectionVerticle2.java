@@ -1,6 +1,6 @@
 package com.englishtown.vertx.hk2.integration;
 
-import com.englishtown.vertx.hk2.MyDependency;
+import com.englishtown.vertx.hk2.MyDependency2;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 
@@ -11,13 +11,13 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Verticle with dependencies injected
  */
-public class DependencyInjectionVerticle extends AbstractVerticle {
+public class DependencyInjectionVerticle2 extends AbstractVerticle {
 
-    private final MyDependency myDependency;
+    private final MyDependency2 myDependency;
     private final Vertx vertx;
 
     @Inject
-    public DependencyInjectionVerticle(MyDependency myDependency, Vertx vertx) {
+    public DependencyInjectionVerticle2(MyDependency2 myDependency, Vertx vertx) {
         this.myDependency = myDependency;
         this.vertx = vertx;
         assertNotNull(myDependency);

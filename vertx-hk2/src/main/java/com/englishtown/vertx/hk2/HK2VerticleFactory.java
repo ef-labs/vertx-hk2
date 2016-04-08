@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright © 2013 Englishtown <opensource@englishtown.com>
+ * Copyright © 2016 Englishtown <opensource@englishtown.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -25,6 +25,8 @@ package com.englishtown.vertx.hk2;
 
 import io.vertx.core.Verticle;
 import io.vertx.core.spi.VerticleFactory;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.api.ServiceLocatorFactory;
 
 import java.lang.reflect.Constructor;
 
@@ -35,9 +37,45 @@ public class HK2VerticleFactory implements VerticleFactory {
 
     public static final String PREFIX = "java-hk2";
 
+    private ServiceLocator locator;
+
     @Override
     public String prefix() {
         return PREFIX;
+    }
+
+    /**
+     * Close the factory. The implementation must release all resources.
+     */
+    @Override
+    public void close() {
+        if (locator != null) {
+            ServiceLocatorFactory.getInstance().destroy(locator);
+            locator = null;
+        }
+    }
+
+    /**
+     * Returns the current parent locator
+     *
+     * @return
+     */
+    public ServiceLocator getLocator() {
+        if (locator == null) {
+            locator = createLocator();
+        }
+        return locator;
+    }
+
+    /**
+     * Sets the parent locator
+     *
+     * @param locator
+     * @return
+     */
+    public HK2VerticleFactory setLocator(ServiceLocator locator) {
+        this.locator = locator;
+        return this;
     }
 
     /**
@@ -50,14 +88,17 @@ public class HK2VerticleFactory implements VerticleFactory {
         // Use the provided class loader to create an instance of HK2VerticleLoader.  This is necessary when working with vert.x IsolatingClassLoader
         @SuppressWarnings("unchecked")
         Class<Verticle> loader = (Class<Verticle>) classLoader.loadClass(HK2VerticleLoader.class.getName());
-        Constructor<Verticle> ctor = loader.getConstructor(String.class, ClassLoader.class);
+        Constructor<Verticle> ctor = loader.getConstructor(String.class, ClassLoader.class, ServiceLocator.class);
 
         if (ctor == null) {
             throw new IllegalStateException("Could not find HK2VerticleLoad constructor");
         }
 
-        return ctor.newInstance(verticleName, classLoader);
+        return ctor.newInstance(verticleName, classLoader, getLocator());
+    }
 
+    protected ServiceLocator createLocator() {
+        return null;
     }
 
 }

@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright © 2013 Englishtown <opensource@englishtown.com>
+ * Copyright © 2016 Englishtown <opensource@englishtown.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -25,6 +25,7 @@ package com.englishtown.vertx.hk2;
 
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
+import org.glassfish.hk2.api.ServiceLocator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,8 +33,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HK2VerticleFactoryTest {
@@ -41,7 +43,7 @@ public class HK2VerticleFactoryTest {
     private HK2VerticleFactory factory;
 
     @Mock
-    Vertx vertx;
+    private Vertx vertx;
 
     @Before
     public void setUp() throws Exception {
@@ -62,6 +64,30 @@ public class HK2VerticleFactoryTest {
 
         HK2VerticleLoader loader = (HK2VerticleLoader) verticle;
         assertEquals(TestHK2Verticle.class.getName(), loader.getVerticleName());
+    }
+
+    @Test
+    public void testSetLocator() throws Exception {
+
+        ServiceLocator original = factory.getLocator();
+        assertNull(original);
+
+        ServiceLocator locator = mock(ServiceLocator.class);
+        factory.setLocator(locator);
+
+        assertEquals(locator, factory.getLocator());
+
+    }
+
+    @Test
+    public void testClose() throws Exception {
+
+        ServiceLocator locator = mock(ServiceLocator.class);
+        factory.setLocator(locator);
+        factory.close();
+
+        verify(locator).shutdown();
+
     }
 
 }
