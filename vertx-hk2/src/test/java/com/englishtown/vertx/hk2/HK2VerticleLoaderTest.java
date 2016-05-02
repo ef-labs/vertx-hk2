@@ -25,9 +25,7 @@ package com.englishtown.vertx.hk2;
 
 import com.englishtown.vertx.hk2.integration.CustomBinder;
 import com.englishtown.vertx.hk2.integration.DependencyInjectionVerticle;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.logging.LogDelegate;
@@ -60,7 +58,9 @@ public class HK2VerticleLoaderTest {
     @Mock
     private Context context;
     @Mock
-    private Future<Void> future;
+    private Future<Void> startFuture;
+    @Mock
+    private Future<Void> stopFuture;
 
     @BeforeClass
     public static void setupOnce() {
@@ -75,17 +75,25 @@ public class HK2VerticleLoaderTest {
     }
 
     private HK2VerticleLoader doTest(String main) throws Exception {
+        HK2VerticleLoader loader = create(main);
+
+        loader.start(startFuture);
+        verify(startFuture).complete();
+        verify(startFuture, never()).fail(any(Throwable.class));
+        verify(startFuture).complete();
+
+        loader.stop(stopFuture);
+        verify(stopFuture, never()).fail(any(Throwable.class));
+        verify(stopFuture).complete();
+
+        return loader;
+    }
+
+    private HK2VerticleLoader create(String main) throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         HK2VerticleLoader loader = new HK2VerticleLoader(main, cl, parent);
 
         loader.init(vertx, context);
-        loader.start(future);
-
-        verify(future).complete();
-        verify(future, never()).fail(any(Throwable.class));
-
-        loader.stop();
-
         return loader;
     }
 
@@ -173,4 +181,57 @@ public class HK2VerticleLoaderTest {
 
     }
 
+    @Test
+    public void testStart_Fail() throws Exception {
+
+        Verticle verticle = create(TestStartFailVerticle.class.getName());
+        verticle.start(startFuture);
+
+        verify(startFuture, never()).complete();
+        verify(startFuture).fail(any(Throwable.class));
+
+    }
+
+    @Test
+    public void testStop_Fail() throws Exception {
+
+        Verticle verticle = create(TestStopFailVerticle.class.getName());
+        verticle.stop(stopFuture);
+
+        verify(stopFuture, never()).complete();
+        verify(stopFuture).fail(any(Throwable.class));
+
+    }
+
+    @Test
+    public void testStop_Throw() throws Exception {
+
+        Verticle verticle = create(TestStopThrowVerticle.class.getName());
+        verticle.stop(stopFuture);
+
+        verify(stopFuture, never()).complete();
+        verify(stopFuture).fail(any(Throwable.class));
+
+    }
+
+    private static class TestStartFailVerticle extends AbstractVerticle {
+        @Override
+        public void start(Future<Void> startFuture) throws Exception {
+            startFuture.fail(new RuntimeException());
+        }
+    }
+
+    private static class TestStopFailVerticle extends AbstractVerticle {
+        @Override
+        public void stop(Future<Void> stopFuture) throws Exception {
+            stopFuture.fail(new RuntimeException());
+        }
+    }
+
+    private static class TestStopThrowVerticle extends AbstractVerticle {
+        @Override
+        public void stop(Future<Void> stopFuture) throws Exception {
+            throw new RuntimeException();
+        }
+    }
 }
