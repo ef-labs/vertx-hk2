@@ -109,18 +109,29 @@ public class HK2VerticleLoader extends AbstractVerticle {
         classLoader = null;
         parent = null;
 
-        try {
-            // Stop the real verticle
-            if (realVerticle != null) {
-                realVerticle.stop(stopFuture);
-                realVerticle = null;
-            }
-
-        } finally {
+        Future<Void> future = Future.future();
+        future.setHandler(result -> {
             // Destroy the service locator
             ServiceLocatorFactory.getInstance().destroy(locator);
             locator = null;
 
+            // Pass result to the stop future
+            if (result.succeeded()) {
+                stopFuture.complete();
+            } else {
+                stopFuture.fail(future.cause());
+            }
+        });
+
+        try {
+            // Stop the real verticle
+            if (realVerticle != null) {
+                realVerticle.stop(future);
+            } else {
+                future.complete();
+            }
+        } catch (Throwable t) {
+            future.fail(t);
         }
 
     }
