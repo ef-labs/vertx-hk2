@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/englishtown/vertx-hk2.png)](https://travis-ci.org/englishtown/vertx-hk2)
-
 # Vert.x HK2 Extension
 Enable Verticle dependency injection using HK2.  Deploy your verticle with the `java-hk2:` prefix to use the `HK2VerticleFactory`.
 
+[![Build Status](http://img.shields.io/travis/ef-labs/vertx-hk2.svg?maxAge=2592000&style=flat-square)](https://travis-ci.org/ef-labs/vertx-hk2)
+[![Maven Central](https://img.shields.io/maven-central/v/com.englishtown.vertx/vertx-hk2.svg?maxAge=2592000&style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.englishtown.vertx/vertx-hk2/)
 
 ## License
 http://englishtown.mit-license.org/
