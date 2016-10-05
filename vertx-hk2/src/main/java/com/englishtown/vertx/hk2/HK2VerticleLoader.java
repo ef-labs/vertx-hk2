@@ -23,12 +23,17 @@
 
 package com.englishtown.vertx.hk2;
 
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Verticle;
+import io.vertx.core.Vertx;
 import io.vertx.core.impl.verticle.CompilingClassLoader;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.Binder;
@@ -36,6 +41,9 @@ import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * HK2 Verticle to lazy load the real verticle with DI
@@ -50,6 +58,10 @@ public class HK2VerticleLoader extends AbstractVerticle {
     private Verticle realVerticle;
     private ServiceLocator locator;
 
+    private static final Map<MultiKey, ServiceLocator> serviceLocatorCache = new ConcurrentHashMap<>();
+    private static final Map<ServiceLocator, AtomicInteger> serviceLocatorVerticleInstanceCount = new ConcurrentHashMap<>();
+
+    public static final String CONFIG_EVENT_LOOP_SINGLETON_SERVICE_LOCATOR_NAME = "hk2_singleton_service_locator";
     public static final String CONFIG_BOOTSTRAP_BINDER_NAME = "hk2_binder";
     public static final String BOOTSTRAP_BINDER_NAME = "com.englishtown.vertx.hk2.BootstrapBinder";
 
@@ -111,8 +123,18 @@ public class HK2VerticleLoader extends AbstractVerticle {
 
         Future<Void> future = Future.future();
         future.setHandler(result -> {
-            // Destroy the service locator
-            ServiceLocatorFactory.getInstance().destroy(locator);
+
+            if (serviceLocatorVerticleInstanceCount.containsKey(locator)) {
+                final int instancesLeft = serviceLocatorVerticleInstanceCount.get(locator).decrementAndGet();
+                if (instancesLeft <= 0) {
+                    // Destroy the service locator
+                    ServiceLocatorFactory.getInstance().destroy(locator);
+                }
+            } else {
+                // Destroy the service locator
+                ServiceLocatorFactory.getInstance().destroy(locator);
+            }
+
             locator = null;
 
             // Pass result to the stop future
@@ -156,17 +178,36 @@ public class HK2VerticleLoader extends AbstractVerticle {
     }
 
     private Verticle createRealVerticle(Class<?> clazz) throws Exception {
+        final JsonArray bootstrapBinderNames = getBootstrapBinderNames();
+        if (isSingletonLocator()) {
+            final MultiKey key = new MultiKey(classLoader, parent, bootstrapBinderNames, Thread.currentThread());
+            if (!serviceLocatorCache.containsKey(key)) {
+                // Each verticle factory will have it's own service locator instance
+                // Passing a null name will not cache the locator in the factory
+                locator = ServiceLocatorFactory.getInstance().create(null, parent);
 
-        JsonObject config = config();
-        Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
-        JsonArray bootstrapNames;
-        List<Binder> bootstraps = new ArrayList<>();
+                serviceLocatorCache.put(key, locator);
+                serviceLocatorVerticleInstanceCount.put(locator, new AtomicInteger(1));
 
-        if (field instanceof JsonArray) {
-            bootstrapNames = (JsonArray) field;
+                logger.info("Caching locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName());
+                return bindToVerticle(clazz, locator, bootstrapBinderNames);
+            } else {
+                locator = serviceLocatorCache.get(key);
+                serviceLocatorVerticleInstanceCount.get(locator).incrementAndGet();
+
+                logger.info("Retrieving cached locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName());
+                return bindToVerticle(clazz, locator, bootstrapBinderNames);
+            }
         } else {
-            bootstrapNames = new JsonArray().add((field == null ? BOOTSTRAP_BINDER_NAME : field));
+            // Each verticle factory will have it's own service locator instance
+            // Passing a null name will not cache the locator in the factory
+            locator = ServiceLocatorFactory.getInstance().create(null, parent);
+            return bindToVerticle(clazz, locator, bootstrapBinderNames);
         }
+    }
+
+    private Verticle bindToVerticle(Class clazz, ServiceLocator locator, JsonArray bootstrapNames) throws IllegalAccessException, InstantiationException {
+        final List<Binder> bootstraps = new ArrayList<>();
 
         for (int i = 0; i < bootstrapNames.size(); i++) {
             String bootstrapName = bootstrapNames.getString(i);
@@ -186,14 +227,28 @@ public class HK2VerticleLoader extends AbstractVerticle {
             }
         }
 
-        // Each verticle factory will have it's own service locator instance
-        // Passing a null name will not cache the locator in the factory
-        locator = ServiceLocatorFactory.getInstance().create(null, parent);
-
         bootstraps.add(0, new HK2VertxBinder(vertx));
-        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
 
+        ServiceLocatorUtilities.bind(locator, bootstraps.toArray(new Binder[bootstraps.size()]));
         return (Verticle) locator.createAndInitialize(clazz);
     }
 
+    private JsonArray getBootstrapBinderNames() {
+        JsonObject config = config();
+        Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
+        JsonArray bootstrapNames;
+
+        if (field instanceof JsonArray) {
+            bootstrapNames = (JsonArray) field;
+        } else {
+            bootstrapNames = new JsonArray().add((field == null ? BOOTSTRAP_BINDER_NAME : field));
+        }
+
+        return bootstrapNames;
+    }
+
+    private boolean isSingletonLocator() {
+        final Boolean configValue = config().getBoolean(CONFIG_EVENT_LOOP_SINGLETON_SERVICE_LOCATOR_NAME, false);
+        return Boolean.valueOf(System.getProperty(CONFIG_EVENT_LOOP_SINGLETON_SERVICE_LOCATOR_NAME, configValue.toString()));
+    }
 }

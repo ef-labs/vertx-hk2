@@ -21,6 +21,7 @@
         <!--Dependency versions-->
         <vertx.version>3.3.0</vertx.version>
         <hk2.version>2.4.0-b34</hk2.version>
+        <commons-collections4.version>4.0</commons-collections4.version>
     </properties>
 
     <dependencies>
