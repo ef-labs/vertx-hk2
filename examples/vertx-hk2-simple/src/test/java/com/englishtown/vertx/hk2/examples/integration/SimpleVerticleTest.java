@@ -1,5 +1,6 @@
 package com.englishtown.vertx.hk2.examples.integration;
 
+import com.englishtown.vertx.hk2.HK2VerticleFactory;
 import com.englishtown.vertx.hk2.examples.Binder;
 import com.englishtown.vertx.hk2.examples.SimpleVerticle;
 import com.englishtown.vertx.hk2.examples.impl.MyDependencyImpl;
@@ -10,6 +11,8 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import static com.englishtown.vertx.hk2.HK2VerticleLoader.CONFIG_BOOTSTRAP_BINDER_NAME;
 
 /**
  * Integration test for {@link SimpleVerticle}
@@ -22,9 +25,9 @@ public class SimpleVerticleTest extends VertxTestBase {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        JsonObject config = new JsonObject().put("hk2_binder", Binder.class.getName());
+        JsonObject config = new JsonObject().put(CONFIG_BOOTSTRAP_BINDER_NAME, Binder.class.getName());
 
-        vertx.deployVerticle("java-hk2:" + SimpleVerticle.class.getName(), new DeploymentOptions().setConfig(config), result -> {
+        vertx.deployVerticle(HK2VerticleFactory.getIdentifier(SimpleVerticle.class), new DeploymentOptions().setConfig(config), result -> {
             if (result.succeeded()) {
                 future.complete(null);
             } else {
