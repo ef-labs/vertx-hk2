@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static com.englishtown.vertx.hk2.HK2VerticleLoader.*;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -120,7 +121,7 @@ public class HK2VerticleLoaderTest {
     @Test
     public void testStart_Custom_Binder() throws Exception {
 
-        config.put("hk2_binder", CustomBinder.class.getName());
+        config.put(CONFIG_BOOTSTRAP_BINDER_NAME, CustomBinder.class.getName());
 
         String main = DependencyInjectionVerticle.class.getName();
         doTest(main);
@@ -132,7 +133,7 @@ public class HK2VerticleLoaderTest {
     @Test
     public void testStart_Custom_Binder_Array() throws Exception {
 
-        config.put("hk2_binder", new JsonArray()
+        config.put(CONFIG_BOOTSTRAP_BINDER_NAME, new JsonArray()
                 .add(CustomBinder.class.getName())
                 .add(BootstrapBinder.class.getName()));
 
@@ -147,7 +148,7 @@ public class HK2VerticleLoaderTest {
     public void testStart_Not_A_Binder() throws Exception {
 
         String binder = String.class.getName();
-        config.put("hk2_binder", binder);
+        config.put(CONFIG_BOOTSTRAP_BINDER_NAME, binder);
 
         String main = DependencyInjectionVerticle.class.getName();
 
@@ -166,7 +167,7 @@ public class HK2VerticleLoaderTest {
     public void testStart_Class_Not_Found_Binder() throws Exception {
 
         String binder = "com.englishtown.INVALID_BINDER";
-        config.put("hk2_binder", binder);
+        config.put(CONFIG_BOOTSTRAP_BINDER_NAME, binder);
 
         String main = DependencyInjectionVerticle.class.getName();
 
@@ -177,7 +178,7 @@ public class HK2VerticleLoaderTest {
             // Expected
         }
 
-        verify(logger).error(eq("HK2 bootstrap binder class " + binder + " was not found.  Are you missing injection bindings?"));
+        verify(logger).warn(eq("HK2 bootstrap binder class " + binder + " was not found.  Are you missing injection bindings?"));
 
     }
 
