@@ -40,8 +40,10 @@ import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -178,9 +180,9 @@ public class HK2VerticleLoader extends AbstractVerticle {
     }
 
     private Verticle createRealVerticle(Class<?> clazz) throws Exception {
-        final JsonArray bootstrapBinderNames = getBootstrapBinderNames();
+        final Set<Class> bootstrapBinderClasses = getBootstrapBinderClasses();
         if (isSingletonLocator()) {
-            final MultiKey key = new MultiKey(classLoader, parent, bootstrapBinderNames, Thread.currentThread());
+            final MultiKey key = new MultiKey(classLoader, parent, bootstrapBinderClasses, Thread.currentThread());
             if (!serviceLocatorCache.containsKey(key)) {
                 // Each verticle factory will have it's own service locator instance
                 // Passing a null name will not cache the locator in the factory
@@ -190,40 +192,33 @@ public class HK2VerticleLoader extends AbstractVerticle {
                 serviceLocatorVerticleInstanceCount.put(locator, new AtomicInteger(1));
 
                 logger.info("Caching locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName());
-                return bindToVerticle(clazz, locator, bootstrapBinderNames);
+                return bindToVerticle(clazz, locator, bootstrapBinderClasses);
             } else {
                 locator = serviceLocatorCache.get(key);
                 serviceLocatorVerticleInstanceCount.get(locator).incrementAndGet();
 
                 logger.info("Retrieving cached locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName());
-                return bindToVerticle(clazz, locator, bootstrapBinderNames);
+                return bindToVerticle(clazz, locator, bootstrapBinderClasses);
             }
         } else {
             // Each verticle factory will have it's own service locator instance
             // Passing a null name will not cache the locator in the factory
             locator = ServiceLocatorFactory.getInstance().create(null, parent);
-            return bindToVerticle(clazz, locator, bootstrapBinderNames);
+            return bindToVerticle(clazz, locator, bootstrapBinderClasses);
         }
     }
 
-    private Verticle bindToVerticle(Class clazz, ServiceLocator locator, JsonArray bootstrapNames) throws IllegalAccessException, InstantiationException {
+    private Verticle bindToVerticle(Class clazz, ServiceLocator locator, Set<Class> bootstrapClasses) throws IllegalAccessException, InstantiationException {
         final List<Binder> bootstraps = new ArrayList<>();
 
-        for (int i = 0; i < bootstrapNames.size(); i++) {
-            String bootstrapName = bootstrapNames.getString(i);
-            try {
-                Class bootstrapClass = classLoader.loadClass(bootstrapName);
-                Object obj = bootstrapClass.newInstance();
+        for (Class bootstrapClass : bootstrapClasses) {
+            Object obj = bootstrapClass.newInstance();
 
-                if (obj instanceof Binder) {
-                    bootstraps.add((Binder) obj);
-                } else {
-                    logger.error("Class " + bootstrapName
-                            + " does not implement Binder.");
-                }
-            } catch (ClassNotFoundException e) {
-                logger.error("HK2 bootstrap binder class " + bootstrapName
-                        + " was not found.  Are you missing injection bindings?");
+            if (obj instanceof Binder) {
+                bootstraps.add((Binder) obj);
+            } else {
+                logger.error("Class " + bootstrapClass.getCanonicalName()
+                        + " does not implement Binder.");
             }
         }
 
@@ -233,7 +228,7 @@ public class HK2VerticleLoader extends AbstractVerticle {
         return (Verticle) locator.createAndInitialize(clazz);
     }
 
-    private JsonArray getBootstrapBinderNames() {
+    private Set<Class> getBootstrapBinderClasses() {
         JsonObject config = config();
         Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
         JsonArray bootstrapNames;
@@ -244,7 +239,18 @@ public class HK2VerticleLoader extends AbstractVerticle {
             bootstrapNames = new JsonArray().add((field == null ? BOOTSTRAP_BINDER_NAME : field));
         }
 
-        return bootstrapNames;
+        final Set<Class> bootstrapClasses = new HashSet<>();
+        for (int i = 0; i < bootstrapNames.size(); i++) {
+            final String bootstrapName = bootstrapNames.getString(i);
+            try {
+                bootstrapClasses.add(classLoader.loadClass(bootstrapName));
+            } catch (ClassNotFoundException e) {
+                logger.error("HK2 bootstrap binder class " + bootstrapName
+                        + " was not found.  Are you missing injection bindings?");
+            }
+        }
+
+        return bootstrapClasses;
     }
 
     private boolean isSingletonLocator() {
