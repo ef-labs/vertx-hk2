@@ -191,13 +191,13 @@ public class HK2VerticleLoader extends AbstractVerticle {
                 serviceLocatorCache.put(key, locator);
                 serviceLocatorVerticleInstanceCount.put(locator, new AtomicInteger(1));
 
-                logger.info("Caching locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName());
+                logger.info("Caching locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName() + " and cache key " + key);
                 return bindToVerticle(clazz, locator, bootstrapBinderClasses);
             } else {
                 locator = serviceLocatorCache.get(key);
                 serviceLocatorVerticleInstanceCount.get(locator).incrementAndGet();
 
-                logger.info("Retrieving cached locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName());
+                logger.info("Retrieving cached locator " + locator.getLocatorId() + " for thread " + Thread.currentThread().getName() + " and cache key " + key);
                 return bindToVerticle(clazz, locator, bootstrapBinderClasses);
             }
         } else {
