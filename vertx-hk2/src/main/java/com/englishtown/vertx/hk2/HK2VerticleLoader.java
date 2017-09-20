@@ -161,10 +161,13 @@ public class HK2VerticleLoader extends AbstractVerticle {
         Object field = config.getValue(CONFIG_BOOTSTRAP_BINDER_NAME);
         JsonArray bootstrapNames;
         List<Binder> bootstraps = new ArrayList<>();
+        boolean hasBootstrap;
 
         if (field instanceof JsonArray) {
+            hasBootstrap = true;
             bootstrapNames = (JsonArray) field;
         } else {
+            hasBootstrap = field != null;
             bootstrapNames = new JsonArray().add((field == null ? BOOTSTRAP_BINDER_NAME : field));
         }
 
@@ -181,8 +184,10 @@ public class HK2VerticleLoader extends AbstractVerticle {
                             + " does not implement Binder.");
                 }
             } catch (ClassNotFoundException e) {
-                logger.error("HK2 bootstrap binder class " + bootstrapName
-                        + " was not found.  Are you missing injection bindings?");
+                if (hasBootstrap || parent == null) {
+                    logger.warn("HK2 bootstrap binder class " + bootstrapName
+                            + " was not found.  Are you missing injection bindings?");
+                }
             }
         }
 

@@ -101,4 +101,24 @@ public class HK2VerticleFactory implements VerticleFactory {
         return null;
     }
 
+    /**
+     * Returns the verticle identifier with the hk2 prefix for deployment
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getIdentifier(Class<? extends Verticle> clazz) {
+        return getIdentifier(clazz.getName());
+    }
+
+    /**
+     * Returns the verticle identifier with the hk2 prefix for deployment
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getIdentifier(String clazz) {
+        return PREFIX + ":" + clazz;
+    }
+
 }

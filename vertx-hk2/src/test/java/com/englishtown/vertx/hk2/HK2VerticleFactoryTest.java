@@ -58,7 +58,7 @@ public class HK2VerticleFactoryTest {
 
     @Test
     public void testCreateVerticle() throws Exception {
-        String identifier = HK2VerticleFactory.PREFIX + ":" + TestHK2Verticle.class.getName();
+        String identifier = HK2VerticleFactory.getIdentifier(TestHK2Verticle.class);
         Verticle verticle = factory.createVerticle(identifier, this.getClass().getClassLoader());
         assertThat(verticle, instanceOf(HK2VerticleLoader.class));
 

@@ -18,7 +18,7 @@ public class IntegrationTestVerticle extends VertxTestBase {
 
     @Test
     public void testDependencyInjection_Compiled() throws Exception {
-        String identifier = HK2VerticleFactory.PREFIX + ":" + DependencyInjectionVerticle.class.getName();
+        String identifier = HK2VerticleFactory.getIdentifier(DependencyInjectionVerticle.class);
         vertx.deployVerticle(identifier, new DeploymentOptions(), ar -> {
             assertTrue(ar.succeeded());
             testComplete();
@@ -28,7 +28,7 @@ public class IntegrationTestVerticle extends VertxTestBase {
 
     @Test
     public void testDependencyInjection_Fail() throws Exception {
-        String identifier = HK2VerticleFactory.PREFIX + ":" + DependencyInjectionVerticle2.class.getName();
+        String identifier = HK2VerticleFactory.getIdentifier(DependencyInjectionVerticle2.class);
         vertx.deployVerticle(identifier, new DeploymentOptions(), ar -> {
             assertTrue(ar.failed());
             testComplete();
@@ -53,7 +53,7 @@ public class IntegrationTestVerticle extends VertxTestBase {
             }
         }));
 
-        String identifier = HK2VerticleFactory.PREFIX + ":" + DependencyInjectionVerticle2.class.getName();
+        String identifier = HK2VerticleFactory.getIdentifier(DependencyInjectionVerticle2.class);
         vertx.deployVerticle(identifier, new DeploymentOptions(), ar -> {
             assertTrue(ar.succeeded());
             testComplete();
@@ -63,7 +63,7 @@ public class IntegrationTestVerticle extends VertxTestBase {
 
     @Test
     public void testDependencyInjection_Uncompiled() throws Exception {
-        String identifier = HK2VerticleFactory.PREFIX + ":" + "UncompiledDIVerticle.java";
+        String identifier = HK2VerticleFactory.getIdentifier("UncompiledDIVerticle.java");
         vertx.deployVerticle(identifier, new DeploymentOptions(), ar -> {
             assertTrue(ar.succeeded());
             testComplete();
