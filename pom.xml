@@ -19,8 +19,8 @@
 
     <properties>
         <!--Dependency versions-->
-        <vertx.version>3.3.0</vertx.version>
-        <hk2.version>2.4.0-b34</hk2.version>
+        <vertx.version>3.4.2</vertx.version>
+        <hk2.version>2.5.0-b32</hk2.version>
     </properties>
 
     <dependencies>
